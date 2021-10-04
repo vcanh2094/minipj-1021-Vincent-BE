@@ -50,26 +50,25 @@ class ProductController extends Controller
             'product_sale' => $request->product_sale,
         ]);
 
-        $images = $request->file('images');
-
+//        $images = $request->file('images');
 //        foreach ($images as $image){
-            $path = $request->file('images')->store('images', 's3');
-            Storage::disk('s3')->setVisibility($path, 'public');
-            $image = Image::create([
-                'image_name' => basename($path),
-                'image_status' => $request->image_status,
-                'image_url' => Storage::disk('s3')->url($path),
-                'image_size' => $request->file('images')->getSize(),
-                'disk' => $request->disk,
-                'imageable_id' => $product->product_id,
-                'imageable_type' => Product::class
-            ]);
+//            $path = $request->file('images')->store('images', 's3');
+//            Storage::disk('s3')->setVisibility($path, 'public');
+//            $image = Image::create([
+//                'image_name' => basename($path),
+//                'image_status' => $request->image_status,
+//                'image_url' => Storage::disk('s3')->url($path),
+//                'image_size' => $request->file('images')->getSize(),
+//                'disk' => $request->disk,
+//                'imageable_id' => $product->product_id,
+//                'imageable_type' => Product::class
+//            ]);
 //        }
         //product created, return success response
         return response()->json([
             'success' => true,
             'message' => 'Product created successfully',
-            'data' => $image
+            'data' => $product
         ], Response::HTTP_OK);
     }
 
