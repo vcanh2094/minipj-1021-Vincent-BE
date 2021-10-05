@@ -14,11 +14,11 @@ class CreateImagesTable extends Migration
     public function up()
     {
         Schema::create('images', function (Blueprint $table) {
-            $table->increments('image_id');
-            $table->string('image_name');
-            $table->integer('image_status')->default(1);
-            $table->string('image_url');
-            $table->string('image_size');
+            $table->increments('id');
+            $table->string('name');
+            $table->integer('status')->default(1);
+            $table->string('url');
+            $table->string('size');
             $table->string('disk')->default('s3');
             $table->unsignedBigInteger('imageable_id');
             $table->string('imageable_type');
