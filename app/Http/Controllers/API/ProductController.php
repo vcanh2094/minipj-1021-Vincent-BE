@@ -121,7 +121,12 @@ class ProductController extends Controller
         return $cate_products;
     }
 
-    //update product
+    /**
+     * Update product
+     * @param Request $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function update(Request $request, $id)
     {
         $this->user = JWTAuth::parseToken()->authenticate();
@@ -132,12 +137,10 @@ class ProductController extends Controller
             'product_price' => 'required|numeric|gt:0',
             'cate_id' => 'required|numeric|min:1',
         ]);
-
         //Send failed response if request is not valid
         if ($validator->fails()) {
             return response()->json(['error' => $validator->messages()], 200);
         }
-
         //Request is valid, update product
         $product = DB::table('products')->where('product_id', '=', $id)->update([
             'product_name' => $request->product_name,
@@ -147,7 +150,6 @@ class ProductController extends Controller
             'product_sale' => $request->product_sale,
             'cate_id' => $request->cate_id,
         ]);
-
         //Product updated, return success response
         return response()->json([
             'success' => true,
@@ -156,12 +158,15 @@ class ProductController extends Controller
         ], Response::HTTP_OK);
     }
 
-
-    //delete product
+    /**
+     * Delete product
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
         $this->user = JWTAuth::parseToken()->authenticate();
-        $product = DB::table('products')->where('product_id', '=', $id)->delete();
+        $product = Product::query()->where('product_id', '=', $id)->delete();
         return response()->json([
             'success' => true,
             'message' => 'Product deleted successfully'
