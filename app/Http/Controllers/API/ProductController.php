@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ProductCollection;
 use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -20,7 +21,7 @@ class ProductController extends Controller
 
     //show list products
     public function index(){
-        $products = DB::table('products')->get();
+        $products = new ProductCollection(Product::all());
         return $products;
     }
 
