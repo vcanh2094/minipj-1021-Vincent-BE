@@ -36,7 +36,7 @@ Route::group([
 Route::get('categories', [CategoryController::class, 'index']); //get Category List
 Route::get('products/feature', [ProductController::class, 'getFeatureProduct']); //get product feature
 Route::get('products/sale', [ProductController::class, 'getSaleProduct']); //get product on sale
-Route::get('products/cate/{id}', [ProductController::class, 'getProductByCategory']); //get product by category id
+Route::get('products/category/{category}', [ProductController::class, 'getProductByCategory']); //get product by category id
 
 //Product page API
 Route::get('products', [ProductController::class, 'index']); //get Product list

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\ProductCollection;
+use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
 use Illuminate\Http\Request;
@@ -86,40 +87,32 @@ class ProductController extends Controller
         return $product;
     }
 
-    //show feature product
+    /**
+     * show feature products
+     * @return ProductCollection
+     */
     public function getFeatureProduct(){
-        $feature_products = DB::table('products')->where('product_feature', '=', '1')->get();
-        if (!$feature_products) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, there is no feature product.'
-            ], 400);
-        }
+        $feature_products = new ProductCollection(Product::query()->where('feature', '=', '1')->get());
         return $feature_products;
     }
 
-    //show on sale product
+    /**
+     * show on-sale products
+     * @return ProductCollection
+     */
     public function getSaleProduct(){
-        $sale_products = DB::table('products')->where('product_sale', '<>', '')->get();
-        if (!$sale_products) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, dont have any product on sale.'
-            ], 400);
-        }
+        $sale_products = new ProductCollection(Product::query()->where('sale', '<>', '0')->get());
         return $sale_products;
     }
 
-    //show product by category
+    /**
+     * show product by category
+     * @param Category $category
+     * @return ProductCollection
+     */
     public function getProductByCategory($id){
-        $cate_products = DB::table('products')->where('cate_id', '=', $id)->get();
-        if (!$cate_products) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, category not found.'
-            ], 400);
-        }
-        return $cate_products;
+        $category_products = new ProductCollection(Product::query()->where('category_id', '=', $id)->get());
+        return $category_products;
     }
 
     /**
