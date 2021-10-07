@@ -3,13 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Resources\CategoryCollection;
 use App\Models\Category;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
     public function index(){
-        $categories = Category::all();
+        $categories = new CategoryCollection(Category::all());
         return response()->json([
             "success" => true,
             "message" => "Category List",
