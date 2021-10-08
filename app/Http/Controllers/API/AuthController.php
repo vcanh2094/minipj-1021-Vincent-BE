@@ -4,7 +4,6 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangeProfileUserRequest;
-use App\Http\Requests\CreateUserFormRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
 use Illuminate\Http\Request;
@@ -18,6 +17,7 @@ class AuthController extends Controller
 {
     /**
      * Register user
+     *
      * @param RegisterUserRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -33,6 +33,7 @@ class AuthController extends Controller
 
     /**
      * Login user
+     *
      * @param LoginUserRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -40,6 +41,7 @@ class AuthController extends Controller
     {
         $validated = $request->validated();
         if (!$token = auth()->attempt($validated)) {
+
             return response()->json([
                 'error' => 'Unauthorized',
                 'message' => 'Invalid Email or Password',
@@ -50,6 +52,7 @@ class AuthController extends Controller
 
     /**
      * Logout user
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function logout(){
@@ -59,6 +62,7 @@ class AuthController extends Controller
 
     /**
      * show user profile
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function userProfile(){
@@ -67,6 +71,7 @@ class AuthController extends Controller
 
     /**
      * create new token
+     *
      * @param $token
      * @return \Illuminate\Http\JsonResponse
      */
@@ -81,6 +86,7 @@ class AuthController extends Controller
 
     /**
      * change user profile
+     *
      * @param ChangeProfileUserRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
