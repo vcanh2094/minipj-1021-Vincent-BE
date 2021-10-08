@@ -9,12 +9,12 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $fillable = [
-        'product_name',
-        'product_price',
-        'product_content',
-        'cate_id',
-        'product_feature',
-        'product_sale'
+        'name',
+        'price',
+        'content',
+        'category_id',
+        'feature',
+        'sale'
     ];
 
     public function images()
