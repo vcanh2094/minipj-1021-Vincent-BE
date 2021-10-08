@@ -1,7 +1,6 @@
 <?php
 
 use App\Http\Controllers\API\AdminController;
-use App\Http\Controllers\API\ImageController;
 use App\Http\Controllers\API\ProductController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -22,7 +21,6 @@ use App\Http\Controllers\API\CategoryController;
 //User API
 Route::post('register', [AuthController::class, 'register']);
 Route::post('login', [AuthController::class, 'login']);
-
 Route::group([
     'prefix' => 'user',
     'middleware' => ['assign.guard:users', 'jwt.auth'],
@@ -43,11 +41,12 @@ Route::get('products', [ProductController::class, 'index']); //get Product list
 Route::get('products/{id}', [ProductController::class, 'show']); // get one product by id
 
 //Admin API
+Route::post('admin-login', [AdminController::class, 'login']);
+Route::post('admin-register', [AdminController::class, 'register']);
 Route::group([
     'prefix' => 'admin',
     'middleware' => ['assign.guard:admins','jwt.auth']
 ], function(){
-    Route::post('login', [AdminController::class, 'login']);
     //CRUD Products
     Route::post('create', [ProductController::class, 'store']); //create new product
     Route::patch('update/{id}', [ProductController::class, 'update']);//update product

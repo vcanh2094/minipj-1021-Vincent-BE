@@ -117,6 +117,7 @@ return [
         'admins' => [
             'provider' => 'admins',
             'expire' => 60,
+            'throttle' => 60
         ]
     ],
 
