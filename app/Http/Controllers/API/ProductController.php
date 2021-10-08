@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductRequest;
 use App\Http\Resources\ProductCollection;
+use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
+use App\Traits\RespondsWithHttpStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -17,41 +20,30 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProductController extends Controller
 {
+    use RespondsWithHttpStatus;
     protected $user;
     private $products;
 
-    //show list products
+    /**
+     * show list products
+     *
+     * @return ProductCollection
+     */
     public function index(){
         $products = new ProductCollection(Product::all());
         return $products;
     }
 
-    //store a newly created product
-    public function store(Request $request){
-        $this->user = JWTAuth::parseToken()->authenticate();
-        //validate
-        $data = $request->only('product_name', 'product_price', 'product_content', 'cate_id', 'product_feature', 'product_sale');
-        $validator = Validator::make($data, [
-            'product_name' => 'required|string',
-            'product_price' => 'required',
-            'cate_id' => 'required',
-        ]);
-
-        //Send failed response if request is not valid
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
-        }
-
-        //if request valid, create new product
-        $product = Product::create([
-            'product_name' => $request->product_name,
-            'product_price' => $request->product_price,
-            'product_content' => $request->product_content,
-            'cate_id' => $request->cate_id,
-            'product_feature' => $request->product_feature,
-            'product_sale' => $request->product_sale,
-        ]);
-
+    /**
+     * store newly created product
+     *
+     * @param StoreProductRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StoreProductRequest $request){
+        $this->admin = JWTAuth::parseToken()->authenticate();
+        $validated = $request->validated();
+        $product = Product::create($validated);
 //        $images = $request->file('images');
 //        foreach ($images as $image){
 //            $path = $request->file('images')->store('images', 's3');
@@ -66,12 +58,7 @@ class ProductController extends Controller
 //                'imageable_type' => Product::class
 //            ]);
 //        }
-        //product created, return success response
-        return response()->json([
-            'success' => true,
-            'message' => 'Product created successfully',
-            'data' => $product
-        ], Response::HTTP_OK);
+        return $this->successWithData('product created successfully', $product, 200);
     }
 
     //show product on id

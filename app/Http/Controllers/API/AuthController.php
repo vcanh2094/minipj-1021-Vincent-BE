@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangeProfileUserRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
+use App\Traits\RespondsWithHttpStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -15,6 +16,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
+    use RespondsWithHttpStatus;
+
     /**
      * Register user
      *
@@ -25,27 +28,20 @@ class AuthController extends Controller
     {
         $validated = $request->validated();
         $user = User::create(array_merge($validated, ['password' => bcrypt($request->password)]));
-        return response()->json([
-            'message' => 'User successfully registered',
-            'user' => $user
-        ], 201);
+        return $this->successWithData('user successfully registered', $user, 201);
     }
 
     /**
      * Login user
      *
      * @param LoginUserRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
      */
     public function login(LoginUserRequest $request)
     {
         $validated = $request->validated();
         if (!$token = auth()->attempt($validated)) {
-
-            return response()->json([
-                'error' => 'Unauthorized',
-                'message' => 'Invalid Email or Password',
-                ], 401);
+            return $this->fails('Invalid email or password', 401);
         }
         return $this->createNewToken($token);
     }
@@ -57,11 +53,11 @@ class AuthController extends Controller
      */
     public function logout(){
         auth()->logout();
-        return response()->json(['message' => 'User successfully signed out']);
+        return $this->success('user successfully signed out', 200);
     }
 
     /**
-     * show user profile
+     * Show user profile
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -93,19 +89,15 @@ class AuthController extends Controller
     public function changeProfile(ChangeProfileUserRequest $request){
         $validated = $request->validated();
         $userId = auth()->user()->id;
-        $user = User::where('id', $userId)->update([
+        $user = User::query()->where('id', $userId)->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'gender' => $request->gender,
                 'birthday' => $request->birthday,
                 'password' => bcrypt($request->new_password),
-                ]
-        );
-        return response()->json([
-            'message' => 'User successfully changed profile',
-            'userID' => $userId
-        ]);
+                ]);
+        return $this->success('user successfully changed profile', 200);
     }
 }
 
