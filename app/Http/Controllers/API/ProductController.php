@@ -3,8 +3,14 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreProductRequest;
+use App\Http\Requests\UpdateProductRequest;
+use App\Http\Resources\ProductCollection;
+use App\Http\Resources\ProductResource;
+use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
+use App\Traits\RespondsWithHttpStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -15,41 +21,31 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProductController extends Controller
 {
+    use RespondsWithHttpStatus;
     protected $user;
     private $products;
 
-    //show list products
+    /**
+     * show list products
+     *
+     * @return ProductCollection
+     */
     public function index(){
-        $products = DB::table('products')->get();
+        $products = new ProductCollection(Product::all());
         return $products;
     }
 
-    //store a newly created product
-    public function store(Request $request){
-        $this->user = JWTAuth::parseToken()->authenticate();
-        //validate
-        $data = $request->only('product_name', 'product_price', 'product_content', 'cate_id', 'product_feature', 'product_sale');
-        $validator = Validator::make($data, [
-            'product_name' => 'required|string',
-            'product_price' => 'required',
-            'cate_id' => 'required',
-        ]);
-
-        //Send failed response if request is not valid
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
-        }
-
-        //if request valid, create new product
-        $product = Product::create([
-            'product_name' => $request->product_name,
-            'product_price' => $request->product_price,
-            'product_content' => $request->product_content,
-            'cate_id' => $request->cate_id,
-            'product_feature' => $request->product_feature,
-            'product_sale' => $request->product_sale,
-        ]);
-
+    /**
+     * store product
+     *
+     * @param StoreProductRequest $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function store(StoreProductRequest $request){
+        $this->admin = JWTAuth::parseToken()->authenticate();
+        $validated = $request->validated();
+        $product = Product::create($validated);
+        $transform = new ProductCollection(Product::query()->where('id', $product->id)->get());
 //        $images = $request->file('images');
 //        foreach ($images as $image){
 //            $path = $request->file('images')->store('images', 's3');
@@ -64,107 +60,73 @@ class ProductController extends Controller
 //                'imageable_type' => Product::class
 //            ]);
 //        }
-        //product created, return success response
-        return response()->json([
-            'success' => true,
-            'message' => 'Product created successfully',
-            'data' => $product
-        ], Response::HTTP_OK);
+        return $this->successWithData('product created successfully', $transform, 200);
     }
 
     //show product on id
     public function show($id)
     {
-        $product = DB::table('products')->where('product_id', '=', $id)->get();
+        $product = Product::query()->where('id', $id)->get();
         if (!$product) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, product not found.'
-            ], 400);
+            return $this->fails('sorry, product not found', 400);
         }
-        return $product;
+        $transform = new ProductCollection($product);
+        return $transform;
     }
 
-    //show feature product
+    /**
+     * show feature products
+     * @return ProductCollection
+     */
     public function getFeatureProduct(){
-        $feature_products = DB::table('products')->where('product_feature', '=', '1')->get();
-        if (!$feature_products) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, there is no feature product.'
-            ], 400);
-        }
+        $feature_products = new ProductCollection(Product::query()->where('feature', '1')->get());
         return $feature_products;
     }
 
-    //show on sale product
+    /**
+     * show on-sale products
+     * @return ProductCollection
+     */
     public function getSaleProduct(){
-        $sale_products = DB::table('products')->where('product_sale', '<>', '')->get();
-        if (!$sale_products) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, dont have any product on sale.'
-            ], 400);
-        }
+        $sale_products = new ProductCollection(Product::query()->where('sale', '<>', '0')->get());
         return $sale_products;
     }
 
-    //show product by category
+    /**
+     * show product by category
+     * @param Category $category
+     * @return ProductCollection
+     */
     public function getProductByCategory($id){
-        $cate_products = DB::table('products')->where('cate_id', '=', $id)->get();
-        if (!$cate_products) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Sorry, category not found.'
-            ], 400);
-        }
-        return $cate_products;
+        $category_products = new ProductCollection(Product::query()->where('category_id', '=', $id)->get());
+        return $category_products;
     }
 
-    //update product
-    public function update(Request $request, $id)
+    /**
+     * Update product
+     *
+     * @param UpdateProductRequest $request
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function update(UpdateProductRequest $request, $id)
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
-        //Validate data
-        $data = $request->only('product_name', 'product_price', 'cate_id');
-        $validator = Validator::make($data, [
-            'product_name' => 'required|string',
-            'product_price' => 'required|numeric|gt:0',
-            'cate_id' => 'required|numeric|min:1',
-        ]);
-
-        //Send failed response if request is not valid
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->messages()], 200);
-        }
-
-        //Request is valid, update product
-        $product = DB::table('products')->where('product_id', '=', $id)->update([
-            'product_name' => $request->product_name,
-            'product_price' => $request->product_price,
-            'product_content' => $request->product_content,
-            'product_feature' => $request->product_feature,
-            'product_sale' => $request->product_sale,
-            'cate_id' => $request->cate_id,
-        ]);
-
-        //Product updated, return success response
-        return response()->json([
-            'success' => true,
-            'message' => 'Product updated successfully',
-            'data' => $product
-        ], Response::HTTP_OK);
+        $this->admin = JWTAuth::parseToken()->authenticate();
+        $validated = $request->validated();
+        $product = Product::query()->where('id', $id)->update($validated);
+        $product = new ProductCollection(Product::query()->where('id', $id)->get());
+        return $this->successWithData('product updated successfully', $product, 200);
     }
 
-
-    //delete product
+    /**
+     * Delete product
+     * @param $id
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function destroy($id)
     {
         $this->user = JWTAuth::parseToken()->authenticate();
-        $product = DB::table('products')->where('product_id', '=', $id)->delete();
-        return response()->json([
-            'success' => true,
-            'message' => 'Product deleted successfully'
-        ], Response::HTTP_OK);
+        Product::query()->where('id', $id)->delete();
+        return $this->success('Product deleted successfully', 200);
     }
 }
