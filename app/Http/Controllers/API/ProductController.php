@@ -41,29 +41,32 @@ class ProductController extends Controller
      * @param StoreProductRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(StoreProductRequest $request){
+    public function store(StoreProductRequest $request, Image $image){
         $this->admin = JWTAuth::parseToken()->authenticate();
         $validated = $request->validated();
         $product = Product::create($validated);
+        if($request->hasFile('images')){
+                $path = $request->file('images')->store('images/vcanh', 's3');
+                Image::create([
+                    'name' => basename($path),
+                    'status' => $request->status,
+                    'url' => Storage::disk('s3')->url($path),
+                    'size' => $request->file('images')->getSize(),
+                    'disk' => $request->disk,
+                    'imageable_id' => $product->id,
+                    'imageable_type' => Product::class
+                ]);
+        }
         $transform = new ProductCollection(Product::query()->where('id', $product->id)->get());
-//        $images = $request->file('images');
-//        foreach ($images as $image){
-//            $path = $request->file('images')->store('images', 's3');
-//            Storage::disk('s3')->setVisibility($path, 'public');
-//            $image = Image::create([
-//                'image_name' => basename($path),
-//                'image_status' => $request->image_status,
-//                'image_url' => Storage::disk('s3')->url($path),
-//                'image_size' => $request->file('images')->getSize(),
-//                'disk' => $request->disk,
-//                'imageable_id' => $product->product_id,
-//                'imageable_type' => Product::class
-//            ]);
-//        }
         return $this->successWithData('product created successfully', $transform, 200);
     }
 
-    //show product on id
+    /**
+     * show a detail product
+     *
+     * @param $id
+     * @return ProductCollection|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     */
     public function show($id)
     {
         $product = Product::query()->where('id', $id)->get();

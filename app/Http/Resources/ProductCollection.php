@@ -23,6 +23,7 @@ class ProductCollection extends ResourceCollection
                 'category_id' => $product->category_id,
                 'feature' => ($product->feature) == 1 ? ('Yes') : ('No'),
                 'discount' => ($product->sale) <> 0 ? (($product->sale*100).'%') : ('No'),
+                'images' => $product->images()->first(),
             ]);
         }
         return $products;
