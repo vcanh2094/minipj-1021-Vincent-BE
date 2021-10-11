@@ -8,12 +8,12 @@ use Illuminate\Database\Eloquent\Model;
 class Slide extends Model
 {
     protected $fillable = [
-        'slide_name',
-        'slide_status',
+        'name',
+        'status',
     ];
 
     public function images()
     {
-        return $this->morphMany(Image::class, 'imageable');
+        return $this->morphOne(Image::class, 'imageable');
     }
 }
