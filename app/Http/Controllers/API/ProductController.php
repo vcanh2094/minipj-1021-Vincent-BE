@@ -45,20 +45,19 @@ class ProductController extends Controller
         $this->admin = JWTAuth::parseToken()->authenticate();
         $validated = $request->validated();
         $product = Product::create($validated);
-        $transform = new ProductCollection(Product::query()->where('id', $product->id)->get());
         if($request->hasFile('images')){
-            $path = $request->file('images');
-            Storage::disk('s3')->put('images/vcanh', $path);
-            Image::create([
-                'name' => basename($path),
-                'status' => $request->status,
-                'url' => Storage::disk('s3')->url($path),
-                'size' => $request->file('images')->getSize(),
-                'disk' => $request->disk,
-                'imageable_id' => $product->id,
-                'imageable_type' => Product::class
-            ]);
+                $path = $request->file('images')->store('images/vcanh', 's3');
+                Image::create([
+                    'name' => basename($path),
+                    'status' => $request->status,
+                    'url' => Storage::disk('s3')->url($path),
+                    'size' => $request->file('images')->getSize(),
+                    'disk' => $request->disk,
+                    'imageable_id' => $product->id,
+                    'imageable_type' => Product::class
+                ]);
         }
+        $transform = new ProductCollection(Product::query()->where('id', $product->id)->get());
         return $this->successWithData('product created successfully', $transform, 200);
     }
 
