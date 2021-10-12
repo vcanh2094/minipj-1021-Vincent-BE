@@ -79,6 +79,7 @@ class ProductController extends Controller
 
     /**
      * show feature products
+     *
      * @return ProductCollection
      */
     public function getFeatureProduct(){
@@ -88,6 +89,7 @@ class ProductController extends Controller
 
     /**
      * show on-sale products
+     *
      * @return ProductCollection
      */
     public function getSaleProduct(){
@@ -97,11 +99,12 @@ class ProductController extends Controller
 
     /**
      * show product by category
+     *
      * @param Category $category
      * @return ProductCollection
      */
     public function getProductByCategory($id){
-        $category_products = new ProductCollection(Product::query()->where('category_id', '=', $id)->get());
+        $category_products = new ProductCollection(Product::query()->where('category_id', $id)->get());
         return $category_products;
     }
 
@@ -112,13 +115,36 @@ class ProductController extends Controller
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function update(UpdateProductRequest $request, $id)
+    public function update(UpdateProductRequest $request, $product)
     {
         $this->admin = JWTAuth::parseToken()->authenticate();
         $validated = $request->validated();
-        $product = Product::query()->where('id', $id)->update($validated);
-        $product = new ProductCollection(Product::query()->where('id', $id)->get());
-        return $this->successWithData('product updated successfully', $product, 200);
+        Product::query()->where('id', $product)->update($validated);
+        if($request->hasFile('images')){
+            $path = $request->file('images')->store('images/vcanh', 's3');
+            $isImage = Image::query()->where('imageable_id', $product)->get();
+            if(!$isImage){
+                Image::create([
+                    'name' => basename($path),
+                    'status' => $request->status,
+                    'url' => Storage::disk('s3')->url($path),
+                    'size' => $request->file('images')->getSize(),
+                    'disk' => $request->disk,
+                    'imageable_id' => $product,
+                    'imageable_type' => Product::class
+                ]);
+            }else{
+                Image::query()->where('imageable_id', $product)->update([
+                    'name' => basename($path),
+                    'status' => $request->status,
+                    'url' => Storage::disk('s3')->url($path),
+                    'size' => $request->file('images')->getSize(),
+                    'disk' => $request->disk,
+                ]);
+            }
+        }
+        $productData = new ProductCollection(Product::query()->where('id', $product)->get());
+        return $this->successWithData('product updated successfully', $productData, 200);
     }
 
     /**
@@ -126,10 +152,11 @@ class ProductController extends Controller
      * @param $id
      * @return \Illuminate\Http\JsonResponse
      */
-    public function destroy($id)
+    public function destroy($product)
     {
         $this->user = JWTAuth::parseToken()->authenticate();
-        Product::query()->where('id', $id)->delete();
+        Product::query()->where('id', $product)->delete();
+        Image::query()->where('imageable_id', $product)->delete();
         return $this->success('Product deleted successfully', 200);
     }
 }

@@ -35,7 +35,7 @@ Route::group([
 Route::get('categories', [CategoryController::class, 'index']); //get Category List
 Route::get('products/feature', [ProductController::class, 'getFeatureProduct']); //get product feature
 Route::get('products/sale', [ProductController::class, 'getSaleProduct']); //get product on sale
-Route::get('products/category/{category}', [ProductController::class, 'getProductByCategory']); //get product by category id
+Route::get('products/categories/{id}', [ProductController::class, 'getProductByCategory']); //get product by category id
 Route::get('banners', [SlideController::class, 'show']); //show banners list
 
 //Product page API
@@ -50,10 +50,7 @@ Route::group([
     'middleware' => ['assign.guard:admins','jwt.auth']
 ], function(){
     Route::post('create-banner', [SlideController::class, 'store']); //add banner
-    //CRUD Products
-    Route::post('create', [ProductController::class, 'store']); //create new product
-    Route::patch('update/{id}', [ProductController::class, 'update']);//update product
-    Route::delete('delete/{product}', [ProductController::class, 'destroy']); //delete product
+    Route::apiResource('products', ProductController::class)->except(['create', 'edit']); //CRUD Products
 });
 
 
