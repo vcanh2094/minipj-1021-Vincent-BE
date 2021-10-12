@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\SlideController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
@@ -35,10 +36,11 @@ Route::get('categories', [CategoryController::class, 'index']); //get Category L
 Route::get('products/feature', [ProductController::class, 'getFeatureProduct']); //get product feature
 Route::get('products/sale', [ProductController::class, 'getSaleProduct']); //get product on sale
 Route::get('products/category/{category}', [ProductController::class, 'getProductByCategory']); //get product by category id
+Route::get('banners', [SlideController::class, 'show']); //show banners list
 
 //Product page API
 Route::get('products', [ProductController::class, 'index']); //get Product list
-Route::get('products/{id}', [ProductController::class, 'show']); // get one product by id
+Route::get('products/{id}', [ProductController::class, 'show']); // get detail product
 
 //Admin API
 Route::post('admin-login', [AdminController::class, 'login']);
@@ -47,6 +49,7 @@ Route::group([
     'prefix' => 'admin',
     'middleware' => ['assign.guard:admins','jwt.auth']
 ], function(){
+    Route::post('create-banner', [SlideController::class, 'store']); //add banner
     //CRUD Products
     Route::post('create', [ProductController::class, 'store']); //create new product
     Route::patch('update/{id}', [ProductController::class, 'update']);//update product
