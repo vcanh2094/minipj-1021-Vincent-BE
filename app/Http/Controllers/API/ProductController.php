@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -50,8 +51,8 @@ class ProductController extends Controller
             return $query->where('id', $request->id);
         })
         ->when($request->has('search'), function ($query) use ($request){
-            return $query->where(strtolower('name'), 'LIKE','%'.strtolower($request->search).'%')
-                        ->orWhere(strtolower('content'), 'LIKE', '%'.strtolower($request->search).'%')
+            return $query->where(Str::of('name')->upper(), 'LIKE','%'.strtoupper($request->search).'%')
+                        ->orWhere(Str::of('content')->upper(), 'LIKE', '%'.strtoupper($request->search).'%')
                         ->orderBy('id');
         });
         $products = $product_query->paginate(20);
