@@ -51,8 +51,8 @@ class ProductController extends Controller
             return $query->where('id', $request->id);
         })
         ->when($request->has('search'), function ($query) use ($request){
-            return $query->where(Str::of('name')->upper(), 'LIKE','%'.strtoupper($request->search).'%')
-                        ->orWhere(Str::of('content')->upper(), 'LIKE', '%'.strtoupper($request->search).'%')
+            return $query->where('name', 'ilike','%'.$request->search.'%')
+                        ->orWhere('content', 'ilike', '%'.$request->search.'%')
                         ->orderBy('id');
         });
         $products = $product_query->paginate(20);
