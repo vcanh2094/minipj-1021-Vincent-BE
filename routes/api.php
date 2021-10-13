@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\ProductController;
+use App\Http\Controllers\API\SearchController;
 use App\Http\Controllers\API\SlideController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -30,17 +31,10 @@ Route::group([
     Route::post('logout', [AuthController::class, 'logout']);
     Route::patch('change-profile', [AuthController::class, 'changeProfile']);
 });
-
 //Home page API
 Route::get('categories', [CategoryController::class, 'index']); //get Category List
-Route::get('products/feature', [ProductController::class, 'getFeatureProduct']); //get product feature
-Route::get('products/sale', [ProductController::class, 'getSaleProduct']); //get product on sale
-Route::get('products/categories/{id}', [ProductController::class, 'getProductByCategory']); //get product by category id
 Route::get('banners', [SlideController::class, 'show']); //show banners list
-
-//Product page API
-Route::get('products', [ProductController::class, 'index']); //get Product list
-Route::get('products/{id}', [ProductController::class, 'show']); // get detail product
+Route::get('products', [ProductController::class, 'index']); //get Product list(feature/sale/byCategory/search)
 
 //Admin API
 Route::post('admin-login', [AdminController::class, 'login']);

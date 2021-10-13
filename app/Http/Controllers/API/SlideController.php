@@ -49,7 +49,7 @@ class SlideController extends Controller
      * @return SlideCollection
      */
     public function show(){
-        $slides = new SlideCollection(Slide::all());
+        $slides = new SlideCollection(Slide::all()->take(5));
         return $slides;
     }
 }

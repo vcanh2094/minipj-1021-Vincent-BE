@@ -30,8 +30,32 @@ class ProductController extends Controller
      *
      * @return ProductCollection
      */
-    public function index(){
-        $products = new ProductCollection(Product::all());
+    public function index(Request $request){
+        $product_query = Product::query()->with(['category', 'images'])
+        ->when($request->has('category'), function($query) use ($request){
+                return $query->where('category_id', $request->category)
+                            ->take(10);
+            })
+        ->when($request->has('feature'), function ($query){
+                return $query->where('feature', 1)
+                            ->orderByDesc('id')
+                            ->take(8);
+            })
+        ->when($request->has('sale'), function ($query){
+                return $query->where('sale', '>', 0)
+                            ->orderByDesc('id')
+                            ->take(9);
+        })
+        ->when($request->has('id'), function ($query) use ($request){
+            return $query->where('id', $request->id);
+        })
+        ->when($request->has('search'), function ($query) use ($request){
+            return $query->where('name', 'like','%'.$request->search.'%')
+                        ->orderBy('name');
+        });
+        $products = $product_query->paginate(20);
+        $products = (new ProductCollection($products));
+//        return $this->successWithData('product fetched successfully', $products, 200);
         return $products;
     }
 
@@ -39,6 +63,7 @@ class ProductController extends Controller
      * store product
      *
      * @param StoreProductRequest $request
+     * @param Image $image
      * @return \Illuminate\Http\JsonResponse
      */
     public function store(StoreProductRequest $request, Image $image){
@@ -62,57 +87,26 @@ class ProductController extends Controller
     }
 
     /**
-     * show a detail product
+     * show product detail
      *
-     * @param $id
+     * @param $product
      * @return ProductCollection|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($product)
     {
-        $product = Product::query()->where('id', $id)->get();
-        if (!$product) {
+        $data = Product::query()->where('id', $product)->get();
+        if (!$data) {
             return $this->fails('sorry, product not found', 400);
         }
-        $transform = new ProductCollection($product);
+        $transform = new ProductCollection($data);
         return $transform;
     }
 
     /**
-     * show feature products
-     *
-     * @return ProductCollection
-     */
-    public function getFeatureProduct(){
-        $feature_products = new ProductCollection(Product::query()->where('feature', '1')->get());
-        return $feature_products;
-    }
-
-    /**
-     * show on-sale products
-     *
-     * @return ProductCollection
-     */
-    public function getSaleProduct(){
-        $sale_products = new ProductCollection(Product::query()->where('sale', '<>', '0')->get());
-        return $sale_products;
-    }
-
-    /**
-     * show product by category
-     *
-     * @param Category $category
-     * @return ProductCollection
-     */
-    public function getProductByCategory($id){
-        $category_products = new ProductCollection(Product::query()->where('category_id', $id)->get());
-        return $category_products;
-    }
-
-    /**
-     * Update product
+     * update product
      *
      * @param UpdateProductRequest $request
-     * @param $id
+     * @param $product
      * @return \Illuminate\Http\JsonResponse
      */
     public function update(UpdateProductRequest $request, $product)
@@ -148,8 +142,9 @@ class ProductController extends Controller
     }
 
     /**
-     * Delete product
-     * @param $id
+     * delete product
+     *
+     * @param $product
      * @return \Illuminate\Http\JsonResponse
      */
     public function destroy($product)
