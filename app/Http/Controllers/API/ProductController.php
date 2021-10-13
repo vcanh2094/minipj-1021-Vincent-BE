@@ -51,11 +51,10 @@ class ProductController extends Controller
         })
         ->when($request->has('search'), function ($query) use ($request){
             return $query->where('name', 'like','%'.$request->search.'%')
-                        ->orderBy('name');
+                        ->orderBy('id');
         });
         $products = $product_query->paginate(20);
         $products = (new ProductCollection($products));
-//        return $this->successWithData('product fetched successfully', $products, 200);
         return $products;
     }
 
