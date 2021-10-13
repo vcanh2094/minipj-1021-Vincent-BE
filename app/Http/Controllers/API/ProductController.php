@@ -50,7 +50,8 @@ class ProductController extends Controller
             return $query->where('id', $request->id);
         })
         ->when($request->has('search'), function ($query) use ($request){
-            return $query->where('name', 'like','%'.$request->search.'%')
+            return $query->where(strtolower('name'), 'LIKE','%'.strtolower($request->search).'%')
+                        ->orWhere(strtolower('content'), 'LIKE', '%'.strtolower($request->search).'%')
                         ->orderBy('id');
         });
         $products = $product_query->paginate(20);
