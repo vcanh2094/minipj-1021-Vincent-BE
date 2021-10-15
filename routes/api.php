@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\SearchController;
 use App\Http\Controllers\API\SlideController;
@@ -27,9 +28,12 @@ Route::group([
     'prefix' => 'user',
     'middleware' => ['assign.guard:users', 'jwt.auth'],
 ], function () {
-    Route::get('user-profile', [AuthController::class, 'userProfile']);
+    Route::get('user-profile', [AuthController::class, 'user_profile']);
+    Route::post('store-order', [OrderController::class, 'store']);
+    Route::get('orders', [OrderController::class, 'index']);
+    Route::get('orders/{order}',[OrderController::class, 'show']);
+    Route::patch('change-profile', [AuthController::class, 'change_profile']);
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::patch('change-profile', [AuthController::class, 'changeProfile']);
 });
 //Home page API
 Route::get('categories', [CategoryController::class, 'index']); //get Category List

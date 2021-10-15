@@ -14,4 +14,10 @@ class OrderDetail extends Model
         'product_price',
         'product_quantity'
     ];
+    public function order(){
+        return $this->belongsTo(Order::class);
+    }
+    public function products(){
+        return $this->hasMany(Product::class);
+    }
 }
