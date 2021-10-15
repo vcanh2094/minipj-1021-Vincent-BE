@@ -17,7 +17,7 @@ trait RespondsWithHttpStatus
         ], $status);
     }
     protected function fails($message, $status = 401){
-        return response([
+        return response()->json([
             'success' => false,
             'error' => $message,
         ], $status);

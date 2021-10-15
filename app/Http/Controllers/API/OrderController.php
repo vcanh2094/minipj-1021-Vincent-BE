@@ -30,10 +30,10 @@ class OrderController extends Controller
     }
 
     /**
-     * show an order detail
+     * show detail of an order
      *
      * @param $order
-     * @return \Illuminate\Support\Collection
+     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
      */
     public function show($order){
         $this->user = JWTAuth::parseToken()->authenticate();
@@ -55,7 +55,7 @@ class OrderController extends Controller
                 'order_details.product_quantity'
             )
             ->get();
-        return $result;
+        return $this->successWithData('order detail fetched successfully', $result, 200);
     }
 
     /**
