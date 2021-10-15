@@ -92,7 +92,7 @@ class ProductController extends Controller
      * show product detail
      *
      * @param $product
-     * @return ProductCollection|\Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\Response
+     * @return ProductCollection|\Illuminate\Http\JsonResponse
      */
     public function show($product)
     {
