@@ -28,6 +28,7 @@ class StoreProductRequest extends FormRequest
             'price' => 'required|numeric',
             'category_id' => 'required',
             'content' => 'string',
+            'description' => 'string',
             'feature' => 'in:0,1',
             'sale' => 'numeric|between:0,1',
         ];
