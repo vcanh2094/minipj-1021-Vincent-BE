@@ -19,15 +19,13 @@ class OrderController extends Controller
     /**
      * show list orders of a user
      *
-     * @return \Illuminate\Contracts\Pagination\LengthAwarePaginator
+     * @return OrderCollection
      */
     public function index(){
         $this->user = JWTAuth::parseToken()->authenticate();
         $query = Order::query()->with('order_details');
-        $orders = $query
-            ->join('users', 'users.id', '=', 'orders.user_id')
-            ->where('orders.user_id', $this->user->id)
-            ->select('orders.id', 'orders.created_at AS date_order', 'orders.total', 'orders.status')->paginate(20);
+        $orders = $query->paginate(20);
+        $orders = new OrderCollection($orders);
         return $orders;
     }
 

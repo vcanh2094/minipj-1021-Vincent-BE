@@ -23,7 +23,7 @@ class OrderCollection extends ResourceCollection
                 'total' => $order->total,
 //                'payment_method' => $order->payment_method,
                 'status' => $order->status,
-
+                'order_details' => $order->order_details()->select('product_name')->get(),
             ]);
         }
         return $orders;
