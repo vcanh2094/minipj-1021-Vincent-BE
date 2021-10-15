@@ -43,7 +43,7 @@ class AuthController extends Controller
         if (!$token = auth()->attempt($validated)) {
             return $this->fails('Invalid email or password', 401);
         }
-        return $this->createNewToken($token);
+        return $this->create_new_token($token);
     }
 
     /**
@@ -61,7 +61,7 @@ class AuthController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function userProfile(){
+    public function user_profile(){
         return response()->json(auth()->user());
     }
 
@@ -71,7 +71,7 @@ class AuthController extends Controller
      * @param $token
      * @return \Illuminate\Http\JsonResponse
      */
-    protected function createNewToken($token){
+    protected function create_new_token($token){
         return response()->json([
             'success' => true,
             'access_token' => $token,
@@ -86,7 +86,7 @@ class AuthController extends Controller
      * @param ChangeProfileUserRequest $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function changeProfile(ChangeProfileUserRequest $request){
+    public function change_profile(ChangeProfileUserRequest $request){
         $validated = $request->validated();
         $userId = auth()->user()->id;
         $user = User::query()->where('id', $userId)->update([
