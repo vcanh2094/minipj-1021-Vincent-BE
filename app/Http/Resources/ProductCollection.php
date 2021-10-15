@@ -21,6 +21,7 @@ class ProductCollection extends ResourceCollection
                 'name' => $product->name,
                 'price' => $product->price,
                 'content' => $product->content,
+                'description' => $product->description,
                 'category_id' => $product->category_id,
                 'feature' => ($product->feature) == 1 ? ('Yes') : ('No'),
                 'discount' => ($product->sale) <> 0 ? (($product->sale*100).'%') : ('No'),
