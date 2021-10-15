@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AdminController;
+use App\Http\Controllers\API\FavoriteController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\SearchController;
@@ -28,6 +29,8 @@ Route::group([
     'prefix' => 'user',
     'middleware' => ['assign.guard:users', 'jwt.auth'],
 ], function () {
+    Route::get('favorites', [FavoriteController::class, 'index']);
+    Route::post('add-favorites', [FavoriteController::class, 'store']);
     Route::get('user-profile', [AuthController::class, 'user_profile']);
     Route::post('store-order', [OrderController::class, 'store']);
     Route::get('orders', [OrderController::class, 'index']);
@@ -36,8 +39,8 @@ Route::group([
     Route::post('logout', [AuthController::class, 'logout']);
 });
 //Home page API
-Route::get('categories', [CategoryController::class, 'index']); //get Category List
-Route::get('banners', [SlideController::class, 'show']); //show banners list
+Route::get('categories', [CategoryController::class, 'index']);
+Route::get('banners', [SlideController::class, 'show']);
 Route::get('products', [ProductController::class, 'index']); //get Product list(feature/sale/byCategory/search)
 
 //Admin API
@@ -47,7 +50,7 @@ Route::group([
     'prefix' => 'admin',
     'middleware' => ['assign.guard:admins','jwt.auth']
 ], function(){
-    Route::post('create-banner', [SlideController::class, 'store']); //add banner
+    Route::post('create-banner', [SlideController::class, 'store']);
     Route::apiResource('products', ProductController::class)->except(['create', 'edit']); //CRUD Products
 });
 
