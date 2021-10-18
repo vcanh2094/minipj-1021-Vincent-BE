@@ -5,12 +5,13 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Http\Resources\ProductCollection;
-use App\Http\Resources\ProductResource;
 use App\Models\Category;
 use App\Models\Image;
 use App\Models\Product;
-use App\Traits\RespondsWithHttpStatus;
+use App\Transformers\ProductTransformer;
+use Flugg\Responder\Http\Responses\SuccessResponseBuilder;
+use Flugg\Responder\Responder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -23,16 +24,18 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProductController extends Controller
 {
-    use RespondsWithHttpStatus;
     protected $user;
     private $products;
 
     /**
      * show list products
      *
-     * @return ProductCollection
+     * @param Request $request
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function index(Request $request){
+    public function index(Request $request, Responder $responder): JsonResponse
+    {
         $product_query = Product::query()->with(['category', 'images'])
         ->when($request->has('category'), function($query) use ($request){
                 return $query->where('category_id', $request->category)
@@ -47,31 +50,32 @@ class ProductController extends Controller
                 return $query->where('sale', '>', 0)
                             ->orderByDesc('id')
                             ->take(9);
-        })
+            })
         ->when($request->has('id'), function ($query) use ($request){
             return $query->where('id', $request->id);
-        })
+            })
         ->when($request->has('search'), function ($query) use ($request){
             return $query->where('name', 'like','%'.$request->search.'%')
                         ->orWhere('content', 'like', '%'.$request->search.'%')
+                        ->orWhere('category_id', 'like', '%'.$request->search.'%')
                         ->orderBy('id');
-        });
-        $products = $product_query->paginate(20);
-        $products = (new ProductCollection($products));
-        return $products;
+            })
+        ;
+        return responder()->success($product_query->paginate(20), new ProductTransformer)->respond();
     }
 
     /**
-     * store product
+     * Store product.
      *
      * @param StoreProductRequest $request
      * @param Image $image
-     * @return \Illuminate\Http\JsonResponse
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function store(StoreProductRequest $request, Image $image){
+    public function store(StoreProductRequest $request, Image $image, Responder $responder): JsonResponse
+    {
         $this->admin = JWTAuth::parseToken()->authenticate();
-        $validated = $request->validated();
-        $product = Product::create($validated);
+        $product = Product::create($request->validated());
         if($request->hasFile('images')){
                 $path = $request->file('images')->store('images/vcanh', 's3');
                 Image::create([
@@ -84,38 +88,33 @@ class ProductController extends Controller
                     'imageable_type' => Product::class
                 ]);
         }
-        $transform = new ProductCollection(Product::query()->where('id', $product->id)->get());
-        return $this->successWithData('product created successfully', $transform, 200);
+        return responder()->success(Product::query()->where('id', $product->id)->get(), new ProductTransformer)->respond();
     }
 
     /**
-     * show product detail
+     * Show product detail.
      *
      * @param $product
-     * @return ProductCollection|\Illuminate\Http\JsonResponse
+     * @param Responder $responder
+     * @return SuccessResponseBuilder
      */
-    public function show($product)
+    public function show($product, Responder $responder): SuccessResponseBuilder
     {
-        $data = Product::query()->where('id', $product)->get();
-        if (!$data) {
-            return $this->fails('sorry, product not found', 400);
-        }
-        $transform = new ProductCollection($data);
-        return $transform;
+        return $responder->success(Product::query()->where('id', $product)->get(), new ProductTransformer);
     }
 
     /**
-     * update product
+     * Update product.
      *
      * @param UpdateProductRequest $request
      * @param $product
-     * @return \Illuminate\Http\JsonResponse
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function update(UpdateProductRequest $request, $product)
+    public function update(UpdateProductRequest $request, $product, Responder $responder): JsonResponse
     {
         $this->admin = JWTAuth::parseToken()->authenticate();
-        $validated = $request->validated();
-        Product::query()->where('id', $product)->update($validated);
+        Product::query()->where('id', $product)->update($request->validated());
         if($request->hasFile('images')){
             $path = $request->file('images')->store('images/vcanh', 's3');
             $isImage = Image::query()->where('imageable_id', $product)->get();
@@ -139,21 +138,21 @@ class ProductController extends Controller
                 ]);
             }
         }
-        $productData = new ProductCollection(Product::query()->where('id', $product)->get());
-        return $this->successWithData('product updated successfully', $productData, 200);
+        return responder()->success(Product::query()->where('id', $product)->get(), new ProductTransformer)->respond();
     }
 
     /**
      * delete product
      *
      * @param $product
-     * @return \Illuminate\Http\JsonResponse
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function destroy($product)
+    public function destroy($product, Responder $responder): JsonResponse
     {
         $this->user = JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->delete();
         Image::query()->where('imageable_id', $product)->delete();
-        return $this->success('Product deleted successfully', 200);
+        return $responder->success()->respond();
     }
 }

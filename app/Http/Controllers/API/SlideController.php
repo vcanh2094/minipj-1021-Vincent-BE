@@ -4,11 +4,13 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreSlideRequest;
-use App\Http\Resources\SlideCollection;
 use App\Models\Image;
 use App\Models\Product;
 use App\Models\Slide;
 use App\Traits\RespondsWithHttpStatus;
+use App\Transformers\SlideTransformer;
+use Flugg\Responder\Responder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -18,15 +20,16 @@ class SlideController extends Controller
     use RespondsWithHttpStatus;
 
     /**
-     * store new slide
+     * Store new slide.
      *
      * @param StoreSlideRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function store(StoreSlideRequest $request){
+    public function store(StoreSlideRequest $request, Responder $responder): JsonResponse
+    {
         $this->admin = JWTAuth::parseToken()->authenticate();
-        $validated = $request->validated();
-        $slide = Slide::create($validated);
+        $slide = Slide::create($request->validated());
         if($request->hasFile('image')){
             $path = $request->file('image')->store('images/vcanh', 's3');
             Image::create([
@@ -39,17 +42,17 @@ class SlideController extends Controller
                 'imageable_type' => Slide::class
             ]);
         }
-        $transform = new SlideCollection(Slide::query()->where('id', $slide->id)->get());
-        return $this->successWithData('slide created successfully', $transform, 200);
+        return $responder->success(Slide::query()->where('id', $slide->id)->get(), new SlideTransformer)->respond();
     }
 
     /**
-     * show all slides
+     * Show all slides
      *
-     * @return SlideCollection
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function show(){
-        $slides = new SlideCollection(Slide::all()->take(5));
-        return $slides;
+    public function show(Responder $responder): JsonResponse
+    {
+        return $responder->success(Slide::all()->take(5), new SlideTransformer)->respond();
     }
 }

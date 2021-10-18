@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\FavoriteCollection;
 use App\Http\Resources\ProductCollection;
 use App\Models\Favorite;
 use App\Traits\RespondsWithHttpStatus;
@@ -36,10 +35,10 @@ class FavoriteController extends Controller
 
     public function store(Request $request){
         $this->user = JWTAuth::parseToken()->authenticate();
-        Favorite::create([
+        $favorite = Favorite::create([
             'user_id' => $this->user->id,
             'product_id' => $request->product_id,
         ]);
-        return $this->success('Product added to favorites successfully', 200);
+        return $this->successWithData('Added favorite product successfully', $favorite, 200);
     }
 }

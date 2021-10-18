@@ -8,6 +8,10 @@ use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Traits\RespondsWithHttpStatus;
+use App\Transformers\OrderTransformer;
+use Flugg\Responder\Responder;
+use Illuminate\Contracts\Foundation\Application;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -17,23 +21,22 @@ class OrderController extends Controller
     use RespondsWithHttpStatus;
 
     /**
-     * show list orders of a user
+     * Show list orders of a user
      *
-     * @return OrderCollection
+     * @return JsonResponse
      */
-    public function index(){
+    public function index(Responder $responder){
         $this->user = JWTAuth::parseToken()->authenticate();
         $query = Order::query()->with('order_details');
-        $orders = $query->paginate(20);
-        $orders = new OrderCollection($orders);
-        return $orders;
+        return responder()->success($query->paginate(20), new OrderTransformer)->respond();
+
     }
 
     /**
      * show detail of an order
      *
      * @param $order
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @return JsonResponse
      */
     public function show($order){
         $this->user = JWTAuth::parseToken()->authenticate();
@@ -62,7 +65,7 @@ class OrderController extends Controller
      * store new order
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function store(Request $request){
         $this->user = JWTAuth::parseToken()->authenticate();
