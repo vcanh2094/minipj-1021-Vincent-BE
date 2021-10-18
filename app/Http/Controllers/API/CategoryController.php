@@ -6,13 +6,14 @@ use App\Http\Controllers\Controller;
 use App\Http\Resources\CategoryCollection;
 use App\Models\Category;
 use App\Traits\RespondsWithHttpStatus;
+use App\Transformers\CategoryTransformer;
+use Flugg\Responder\Responder;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
 {
     use RespondsWithHttpStatus;
-    public function index(){
-        $categories = new CategoryCollection(Category::all());
-        return $this->successWithData('Category List', $categories, 200);
+    public function index(Responder $responder){
+        return $responder->success(Category::all(), new CategoryTransformer)->respond();
     }
 }

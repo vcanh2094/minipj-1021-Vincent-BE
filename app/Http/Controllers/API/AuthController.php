@@ -7,6 +7,8 @@ use App\Http\Requests\ChangeProfileUserRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
 use App\Traits\RespondsWithHttpStatus;
+use Flugg\Responder\Responder;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
@@ -19,59 +21,65 @@ class AuthController extends Controller
     use RespondsWithHttpStatus;
 
     /**
-     * Register user
+     * Register user.
      *
      * @param RegisterUserRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function register(RegisterUserRequest $request)
+    public function register(RegisterUserRequest $request, Responder $responder)
     {
         $validated = $request->validated();
         $user = User::create(array_merge($validated, ['password' => bcrypt($request->password)]));
-        return $this->successWithData('user successfully registered', $user, 201);
+        return responder()->success($user)->respond();
     }
 
     /**
-     * Login user
+     * Login user.
      *
      * @param LoginUserRequest $request
-     * @return \Illuminate\Contracts\Foundation\Application|\Illuminate\Contracts\Routing\ResponseFactory|\Illuminate\Http\JsonResponse|\Illuminate\Http\Response
+     * @param Responder $responder
+     * @return JsonResponse
      */
-    public function login(LoginUserRequest $request)
+    public function login(LoginUserRequest $request, Responder $responder): JsonResponse
     {
         $validated = $request->validated();
         if (!$token = auth()->attempt($validated)) {
-            return $this->fails('Invalid email or password', 401);
+            return responder()->error(401, 'Invalid email or password')->respond();
+        }else{
+            return $this->create_new_token($token);
         }
-        return $this->create_new_token($token);
+
     }
 
     /**
      * Logout user
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function logout(){
+    public function logout(Responder $responder){
         auth()->logout();
-        return $this->success('user successfully signed out', 200);
+        return $responder->success()->respond();
     }
 
     /**
      * Show user profile
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function user_profile(){
+    public function user_profile(): JsonResponse
+    {
         return response()->json(auth()->user());
     }
 
     /**
-     * create new token
+     * Create new token
      *
      * @param $token
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    protected function create_new_token($token){
+    protected function create_new_token($token): JsonResponse
+    {
         return response()->json([
             'success' => true,
             'access_token' => $token,
@@ -84,9 +92,9 @@ class AuthController extends Controller
      * change user profile
      *
      * @param ChangeProfileUserRequest $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function change_profile(ChangeProfileUserRequest $request){
+    public function change_profile(ChangeProfileUserRequest $request, Responder $responder){
         $validated = $request->validated();
         $userId = auth()->user()->id;
         $user = User::query()->where('id', $userId)->update([
@@ -97,7 +105,7 @@ class AuthController extends Controller
                 'birthday' => $request->birthday,
                 'password' => bcrypt($request->new_password),
                 ]);
-        return $this->success('user successfully changed profile', 200);
+        return responder()->success(User::query()->where('id', $userId))->respond();
     }
 }
 

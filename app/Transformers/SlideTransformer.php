@@ -2,10 +2,10 @@
 
 namespace App\Transformers;
 
-use App\Models\User;
+use App\Models\Slide;
 use Flugg\Responder\Transformers\Transformer;
 
-class UserTransformer extends Transformer
+class SlideTransformer extends Transformer
 {
     /**
      * List of available relations.
@@ -24,18 +24,16 @@ class UserTransformer extends Transformer
     /**
      * Transform the model.
      *
-     * @param  \App\Models\User $user
+     * @param Slide $slide
      * @return array
      */
-    public function transform(User $user)
+    public function transform(Slide $slide)
     {
         return [
-            'id' => (int) $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'gender' => $user->gender,
-            'birthday' => $user->birthday,
+            'id' => (int) $slide->id,
+            'name' => (string) $slide->name,
+            'status' => ($slide->status) == 1 ? 'active' : 'private',
+            'image' => $slide->images()->select(['id', 'name', 'url', 'status', 'imageable_type AS image_type'])->first(),
         ];
     }
 }

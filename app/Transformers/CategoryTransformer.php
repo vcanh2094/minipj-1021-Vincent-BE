@@ -2,10 +2,10 @@
 
 namespace App\Transformers;
 
-use App\Models\User;
+use App\Models\Category;
 use Flugg\Responder\Transformers\Transformer;
 
-class UserTransformer extends Transformer
+class CategoryTransformer extends Transformer
 {
     /**
      * List of available relations.
@@ -24,18 +24,15 @@ class UserTransformer extends Transformer
     /**
      * Transform the model.
      *
-     * @param  \App\Models\User $user
+     * @param \App\Transformers\Category $category
      * @return array
      */
-    public function transform(User $user)
+    public function transform(Category $category)
     {
         return [
-            'id' => (int) $user->id,
-            'name' => $user->name,
-            'email' => $user->email,
-            'phone' => $user->phone,
-            'gender' => $user->gender,
-            'birthday' => $user->birthday,
+            'id' => (int) $category->id,
+            'name' => (string) $category->name,
+            'status' => (int) $category->status == 1 ? 'active' : 'private',
         ];
     }
 }
