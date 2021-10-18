@@ -22,6 +22,7 @@ class CategoryCollection extends ResourceCollection
         foreach($this->collection as $category) {
 
             array_push($categories, [
+                'id' => $category->id,
                 'name' => $category->name,
                 'status' => (($category->status == 1) ? ('active') : ('private')),
             ]);
