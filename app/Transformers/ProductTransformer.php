@@ -39,6 +39,7 @@ class ProductTransformer extends Transformer
             'feature' => ($product->feature) == 1 ? ('Yes') : ('No'),
             'discount' => ($product->sale) <> 0 ? (($product->sale*100).'%') : ('No'),
             'images' => $product->images()->select(['id', 'name', 'url'])->get(),
+            'date_update' => date('d-m-Y H:i', strtotime($product->updated_at)),
         ];
     }
 }

@@ -60,6 +60,18 @@ class ProductController extends Controller
                         ->orWhere('category_id', 'like', '%'.$request->search.'%')
                         ->orderBy('id');
             })
+        ->when($request->has('asc'), function($query){
+            return $query->orderBy('price');
+        })
+        ->when($request->has('desc'), function($query){
+            return $query->orderByDesc('price');
+        })
+        ->when($request->has('sort-by-sale'), function($query){
+            return $query->orderByDesc('sale');
+        })
+        ->when($request->has('date-update'), function($query){
+            return $query->orderByDesc('updated_at');
+        })
         ;
         return responder()->success($product_query->paginate(20), new ProductTransformer)->respond();
     }
