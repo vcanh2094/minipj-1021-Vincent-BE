@@ -99,14 +99,25 @@ class AuthController extends Controller
     public function change_profile(ChangeProfileUserRequest $request, Responder $responder){
         $validated = $request->validated();
         $userId = auth()->user()->id;
-        $user = User::query()->where('id', $userId)->update([
+        if($request->isChangePassword == true){
+            $user = User::query()->where('id', $userId)->update([
                 'name' => $request->name,
                 'email' => $request->email,
                 'phone' => $request->phone,
                 'gender' => $request->gender,
                 'birthday' => $request->birthday,
                 'password' => bcrypt($request->new_password),
-                ]);
+            ]);
+        }else{
+            $user = User::query()->where('id', $userId)->update([
+                'name' => $request->name,
+                'email' => $request->email,
+                'phone' => $request->phone,
+                'gender' => $request->gender,
+                'birthday' => $request->birthday,
+            ]);
+        }
+
         return responder()->success(User::query()->where('id', $userId))->respond();
     }
 }
