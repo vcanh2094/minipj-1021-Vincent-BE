@@ -29,13 +29,10 @@ Route::group([
     'prefix' => 'user',
     'middleware' => ['assign.guard:users', 'jwt.auth'],
 ], function () {
-    Route::get('favorites', [FavoriteController::class, 'index']);
-    Route::post('add-favorites', [FavoriteController::class, 'store']);
     Route::get('user-profile', [AuthController::class, 'user_profile']);
-    Route::post('store-order', [OrderController::class, 'store']);
-    Route::get('orders', [OrderController::class, 'index']);
-    Route::get('orders/{order}',[OrderController::class, 'show']);
     Route::patch('change-profile', [AuthController::class, 'change_profile']);
+    Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
+    Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
     Route::post('logout', [AuthController::class, 'logout']);
 });
 //Home page API

@@ -73,4 +73,20 @@ class FavoriteController extends Controller
             return $this->success('Added favorite product successfully', 200);
         }
     }
+
+    /**
+     * Remove favorite product
+     *
+     * @param Request $request
+     * @param $product
+     * @return JsonResponse
+     */
+    public function destroy(Request $request, $product): JsonResponse
+    {
+        $this->user = JWTAuth::parseToken()->authenticate();
+        Favorite::query()
+            ->where('user_id', $this->user->id)
+            ->where('product_id', '=' ,$product)->delete();
+        return $this->success('Deleted favorite product successfully', 200);
+    }
 }
