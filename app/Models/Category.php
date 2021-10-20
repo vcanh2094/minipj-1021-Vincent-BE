@@ -10,8 +10,8 @@ use Illuminate\Database\Eloquent\Model;
 class Category extends Model implements Transformable
 {
     protected $fillable = [
-        'cate_name',
-        'cate_status',
+        'name',
+        'status',
     ];
 
     public function products(){
