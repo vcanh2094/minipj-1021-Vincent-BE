@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginAdminRequest;
 use App\Http\Requests\RegisterAdminRequest;
 use App\Models\Admin;
+use Flugg\Responder\Responder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -22,10 +23,7 @@ class AdminController extends Controller
     public function register(RegisterAdminRequest $request): JsonResponse
     {
         $admin = Admin::create(array_merge($request->validated(), ['password' => bcrypt($request->password)]));
-        return response()->json([
-            'message' => 'Admin successfully registered',
-            'data' => $admin
-        ], 201);
+        return responder()->success($admin)->respond();
     }
 
     /**
@@ -38,12 +36,9 @@ class AdminController extends Controller
     {
         config()->set( 'auth.defaults.guard', 'admins' );
         if (!$token = auth()->attempt($request->validated())) {
-            return response()->json([
-                'error' => 'Unauthorized',
-                'message' => 'Invalid Email or Password',
-            ], 401);
+            return responder()->error('401', 'Invalid email or password')->respond(401);
         }
-        return $this->createNewToken($token);
+        return $this->create_new_token($token);
     }
 
     /**
@@ -52,13 +47,8 @@ class AdminController extends Controller
      * @param $token
      * @return JsonResponse
      */
-    protected function createNewToken($token): JsonResponse
+    protected function create_new_token($token): JsonResponse
     {
-        return response()->json([
-            'success' => true,
-            'access_token' => $token,
-            'token_type' => 'bearer',
-            'expires_in' => auth()->factory()->getTTL() * 60,
-        ]);
+        return responder()->success(['access_token' => $token, 'token_type' => 'bearer', 'expires_in' => auth()->factory()->getTTL() * 60,])->respond();
     }
 }
