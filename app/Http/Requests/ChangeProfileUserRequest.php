@@ -29,9 +29,6 @@ class ChangeProfileUserRequest extends FormRequest
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'gender' => 'in:1,0',
             'birthday' => 'date_format:Y-m-d',
-            'isChangePassword' => 'boolean',
-            'old_password' => 'required_if:isChangePassword.*,in:true|string|min:6',
-            'new_password' => 'required_if:isChangePassword.*,in:true|min:6'
         ];
     }
 }

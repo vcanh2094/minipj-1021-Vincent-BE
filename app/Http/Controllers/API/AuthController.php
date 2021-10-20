@@ -6,8 +6,6 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ChangeProfileUserRequest;
 use App\Http\Requests\LoginUserRequest;
 use App\Http\Requests\RegisterUserRequest;
-use App\Traits\RespondsWithHttpStatus;
-use Flugg\Responder\Responder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -18,19 +16,15 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
-    use RespondsWithHttpStatus;
-
     /**
      * Register user.
      *
      * @param RegisterUserRequest $request
-     * @param Responder $responder
      * @return JsonResponse
      */
-    public function register(RegisterUserRequest $request, Responder $responder)
+    public function register(RegisterUserRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-        $user = User::create(array_merge($validated, ['password' => bcrypt($request->password)]));
+        $user = User::create(array_merge($request->validated(), ['password' => bcrypt($request->password)]));
         return responder()->success($user)->respond();
     }
 
@@ -38,13 +32,11 @@ class AuthController extends Controller
      * Login user.
      *
      * @param LoginUserRequest $request
-     * @param Responder $responder
      * @return JsonResponse
      */
-    public function login(LoginUserRequest $request, Responder $responder): JsonResponse
+    public function login(LoginUserRequest $request): JsonResponse
     {
-        $validated = $request->validated();
-        if (!$token = auth()->attempt($validated)) {
+        if (!$token = auth()->attempt($request->validated())) {
             return responder()->error(401, 'Invalid email or password')->respond();
         }else{
             return $this->create_new_token($token);
@@ -57,9 +49,10 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function logout(Responder $responder){
+    public function logout(): JsonResponse
+    {
         auth()->logout();
-        return $responder->success()->respond();
+        return responder()->success()->respond();
     }
 
     /**
@@ -69,7 +62,7 @@ class AuthController extends Controller
      */
     public function user_profile(): JsonResponse
     {
-        return response()->json(auth()->user());
+        return responder()->success(auth()->user())->respond();
     }
 
     /**
@@ -80,14 +73,13 @@ class AuthController extends Controller
      */
     protected function create_new_token($token): JsonResponse
     {
-        return response()->json([
-            'success' => true,
+        return responder()->success([
             'access_token' => $token,
             'token_type' => 'bearer',
             'user_id' => auth()->user()->id,
             'user_name' => auth()->user()->name,
             'expires_in' => auth()->factory()->getTTL() * 60,
-        ]);
+        ])->respond();
     }
 
     /**
@@ -96,28 +88,15 @@ class AuthController extends Controller
      * @param ChangeProfileUserRequest $request
      * @return JsonResponse
      */
-    public function change_profile(ChangeProfileUserRequest $request, Responder $responder){
-        $validated = $request->validated();
+    public function change_profile(ChangeProfileUserRequest $request): JsonResponse
+    {
+        $request->validated();
         $userId = auth()->user()->id;
         if($request->isChangePassword == true){
-            $user = User::query()->where('id', $userId)->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'gender' => $request->gender,
-                'birthday' => $request->birthday,
-                'password' => bcrypt($request->new_password),
-            ]);
+            User::query()->where('id', $userId)->update(array_merge($request->validated(),['password' => bcrypt($request->new_password)]));
         }else{
-            $user = User::query()->where('id', $userId)->update([
-                'name' => $request->name,
-                'email' => $request->email,
-                'phone' => $request->phone,
-                'gender' => $request->gender,
-                'birthday' => $request->birthday,
-            ]);
+            User::query()->where('id', $userId)->update($request->validated());
         }
-
         return responder()->success(User::query()->where('id', $userId))->respond();
     }
 }
