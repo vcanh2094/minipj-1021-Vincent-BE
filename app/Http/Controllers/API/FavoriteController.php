@@ -3,17 +3,25 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\ProductCollection;
 use App\Models\Favorite;
 use App\Traits\RespondsWithHttpStatus;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\Console\Input\Input;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class FavoriteController extends Controller
 {
     use RespondsWithHttpStatus;
-    public function index(){
+
+    /**
+     * Show list favorite product
+     *
+     * @return JsonResponse
+     */
+    public function index(): JsonResponse
+    {
         $this->user = JWTAuth::parseToken()->authenticate();
         $products = DB::table('favorites')
             ->join('products', 'favorites.product_id', '=', 'products.id')
@@ -29,16 +37,40 @@ class FavoriteController extends Controller
                 'images.url AS image_url',
                 'images.imageable_type AS image_type'
             )
+            ->where('favorites.user_id', $this->user->id)
             ->get();
         return $this->successWithData('Fetched favorite products successfully', $products, 200);
     }
 
-    public function store(Request $request){
+    /**
+     * Add new favorite product
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function store(Request $request): JsonResponse
+    {
         $this->user = JWTAuth::parseToken()->authenticate();
-        $favorite = Favorite::create([
-            'user_id' => $this->user->id,
-            'product_id' => $request->product_id,
-        ]);
-        return $this->successWithData('Added favorite product successfully', $favorite, 200);
+        $favorite_product = Favorite::query()
+            ->where('user_id', $this->user->id)
+            ->where('product_id', '=' ,$request->product_id)->first();
+        $user = Favorite::where('user_id', $this->user->id)->first();
+        if ($user && !$favorite_product){
+            Favorite::create([
+                'user_id' => $this->user->id,
+                'product_id' => $request->product_id,
+            ]);
+            return $this->success('Added favorite product successfully', 200);
+        }
+        else if($user && $favorite_product){
+            return $this->fails('This product is already in your favorite list');
+        }
+        else{
+            Favorite::create([
+                'user_id' => $this->user->id,
+                'product_id' => $request->product_id,
+            ]);
+            return $this->success('Added favorite product successfully', 200);
+        }
     }
 }
