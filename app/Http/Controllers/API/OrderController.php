@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\Controller;
-use App\Http\Resources\OrderCollection;
+use App\Http\Requests\StoreOrderRequest;
 use App\Models\Order;
 use App\Models\OrderDetail;
 use App\Models\Product;
 use App\Traits\RespondsWithHttpStatus;
 use App\Transformers\OrderTransformer;
-use Flugg\Responder\Responder;
 use Illuminate\Contracts\Foundation\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -25,20 +24,21 @@ class OrderController extends Controller
      *
      * @return JsonResponse
      */
-    public function index(Responder $responder){
+    public function index(): JsonResponse
+    {
         $this->user = JWTAuth::parseToken()->authenticate();
         $query = Order::query()->with('order_details');
         return responder()->success($query->paginate(20), new OrderTransformer)->respond();
-
     }
 
     /**
-     * show detail of an order
+     * Show detail of an order
      *
      * @param $order
      * @return JsonResponse
      */
-    public function show($order){
+    public function show($order): JsonResponse
+    {
         $this->user = JWTAuth::parseToken()->authenticate();
         $result = DB::table('orders')
             ->join('order_details', 'orders.id', '=', 'order_details.order_id')
@@ -64,17 +64,13 @@ class OrderController extends Controller
     /**
      * store new order
      *
-     * @param Request $request
+     * @param StoreOrderRequest $request
      * @return JsonResponse
      */
-    public function store(Request $request){
+    public function store(StoreOrderRequest $request): JsonResponse
+    {
         $this->user = JWTAuth::parseToken()->authenticate();
-        $order = Order::create([
-            'user_id' => $request->user()->id,
-            'total' => $request->total,
-            'payment_method' => $request->payment_method,
-            'status' => $request->status
-        ]);
+        $order = Order::create(array_merge($request->validated(),['user_id' => $request->user()->id]));
         foreach( $request->products as $product => $value){
             OrderDetail::create([
                 'order_id' => $order->id,
@@ -84,6 +80,6 @@ class OrderController extends Controller
                 'product_quantity' => $value['quantity'],
             ]);
         }
-        return $this->success('Order created successfully', 200);
+        return $this->successWithData('Order created successfully', $order, 200);
     }
 }

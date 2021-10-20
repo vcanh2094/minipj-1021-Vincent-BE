@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
 use App\Models\Category;
+use App\Models\Favorite;
 use App\Models\Image;
 use App\Models\Product;
 use App\Transformers\ProductTransformer;
@@ -31,46 +32,45 @@ class ProductController extends Controller
      * show list products
      *
      * @param Request $request
-     * @param Responder $responder
      * @return JsonResponse
      */
-    public function index(Request $request, Responder $responder): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $product_query = Product::query()->with(['category', 'images'])
         ->when($request->has('category'), function($query) use ($request){
                 return $query->where('category_id', $request->category)
                             ->take(10);
-            })
+        })
         ->when($request->has('feature'), function ($query){
                 return $query->where('feature', 1)
                             ->orderByDesc('id')
                             ->take(8);
-            })
+        })
         ->when($request->has('sale'), function ($query){
                 return $query->where('sale', '>', 0)
                             ->orderByDesc('id')
                             ->take(9);
-            })
+        })
         ->when($request->has('id'), function ($query) use ($request){
-            return $query->where('id', $request->id);
-            })
+                return $query->where('id', $request->id);
+        })
         ->when($request->has('search'), function ($query) use ($request){
-            return $query->where('name', 'like','%'.$request->search.'%')
-                        ->orWhere('content', 'like', '%'.$request->search.'%')
-                        ->orWhere('category_id', 'like', '%'.$request->search.'%')
-                        ->orderBy('id');
-            })
+                return $query->where('name', 'like','%'.$request->search.'%')
+                            ->orWhere('content', 'like', '%'.$request->search.'%')
+                            ->orWhere('category_id', 'like', '%'.$request->search.'%')
+                            ->orderBy('id');
+        })
         ->when($request->has('asc'), function($query){
-            return $query->orderBy('price');
+                return $query->orderBy('price');
         })
         ->when($request->has('desc'), function($query){
-            return $query->orderByDesc('price');
+                return $query->orderByDesc('price');
         })
         ->when($request->has('sort-by-sale'), function($query){
-            return $query->orderByDesc('sale');
+                return $query->orderByDesc('sale');
         })
         ->when($request->has('date-update'), function($query){
-            return $query->orderByDesc('updated_at');
+                return $query->orderByDesc('updated_at');
         })
         ;
         return responder()->success($product_query->paginate(20), new ProductTransformer)->respond();
@@ -80,11 +80,9 @@ class ProductController extends Controller
      * Store product.
      *
      * @param StoreProductRequest $request
-     * @param Image $image
-     * @param Responder $responder
      * @return JsonResponse
      */
-    public function store(StoreProductRequest $request, Image $image, Responder $responder): JsonResponse
+    public function store(StoreProductRequest $request): JsonResponse
     {
         $this->admin = JWTAuth::parseToken()->authenticate();
         $product = Product::create($request->validated());
@@ -104,26 +102,13 @@ class ProductController extends Controller
     }
 
     /**
-     * Show product detail.
-     *
-     * @param $product
-     * @param Responder $responder
-     * @return SuccessResponseBuilder
-     */
-    public function show($product, Responder $responder): SuccessResponseBuilder
-    {
-        return $responder->success(Product::query()->where('id', $product)->get(), new ProductTransformer);
-    }
-
-    /**
      * Update product.
      *
      * @param UpdateProductRequest $request
      * @param $product
-     * @param Responder $responder
      * @return JsonResponse
      */
-    public function update(UpdateProductRequest $request, $product, Responder $responder): JsonResponse
+    public function update(UpdateProductRequest $request, $product): JsonResponse
     {
         $this->admin = JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->update($request->validated());
@@ -157,14 +142,14 @@ class ProductController extends Controller
      * delete product
      *
      * @param $product
-     * @param Responder $responder
      * @return JsonResponse
      */
-    public function destroy($product, Responder $responder): JsonResponse
+    public function destroy($product): JsonResponse
     {
         $this->user = JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->delete();
         Image::query()->where('imageable_id', $product)->delete();
-        return $responder->success()->respond();
+        Favorite::query()->where('product_id', $product)->delete();
+        return responder()->success()->respond();
     }
 }
