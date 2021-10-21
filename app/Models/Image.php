@@ -11,10 +11,10 @@ class Image extends Model
     use SoftDeletes;
     protected $fillable = [
         'name',
-        'status',
+        'status' => 1,
         'url',
         'size',
-        'disk',
+        'disk' => 's3',
         'imageable_id',
         'imageable_type'
     ];
