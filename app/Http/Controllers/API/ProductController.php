@@ -9,6 +9,7 @@ use App\Models\Category;
 use App\Models\Favorite;
 use App\Models\Image;
 use App\Models\Product;
+use App\Services\ProductService;
 use App\Transformers\ProductTransformer;
 use Flugg\Responder\Http\Responses\SuccessResponseBuilder;
 use Flugg\Responder\Responder;
@@ -80,24 +81,14 @@ class ProductController extends Controller
      * Store product.
      *
      * @param StoreProductRequest $request
+     * @param ProductService $productService
      * @return JsonResponse
      */
-    public function store(StoreProductRequest $request): JsonResponse
+    public function store( StoreProductRequest $request, ProductService $productService): JsonResponse
     {
         $this->admin = JWTAuth::parseToken()->authenticate();
         $product = Product::create($request->validated());
-        if($request->hasFile('images')){
-                $path = $request->file('images')->store('images/vcanh', 's3');
-                Image::create([
-                    'name' => basename($path),
-                    'status' => $request->status,
-                    'url' => Storage::disk('s3')->url($path),
-                    'size' => $request->file('images')->getSize(),
-                    'disk' => $request->disk,
-                    'imageable_id' => $product->id,
-                    'imageable_type' => Product::class
-                ]);
-        }
+        $productService->handleUploadProductImage($request->images,$product->id);
         return responder()->success(Product::query()->where('id', $product->id)->get(), new ProductTransformer)->respond();
     }
 
@@ -106,9 +97,10 @@ class ProductController extends Controller
      *
      * @param UpdateProductRequest $request
      * @param $product
+     * @param ProductService $productService
      * @return JsonResponse
      */
-    public function update(UpdateProductRequest $request, $product): JsonResponse
+    public function update(UpdateProductRequest $request, $product, ProductService $productService): JsonResponse
     {
         $this->admin = JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->update($request->validated());
@@ -116,22 +108,12 @@ class ProductController extends Controller
             $path = $request->file('images')->store('images/vcanh', 's3');
             $isImage = Image::query()->where('imageable_id', $product)->get();
             if(!$isImage){
-                Image::create([
-                    'name' => basename($path),
-                    'status' => $request->status,
-                    'url' => Storage::disk('s3')->url($path),
-                    'size' => $request->file('images')->getSize(),
-                    'disk' => $request->disk,
-                    'imageable_id' => $product,
-                    'imageable_type' => Product::class
-                ]);
+                $productService->handleUpdateProductImage($request->images, $path, $product);
             }else{
                 Image::query()->where('imageable_id', $product)->update([
                     'name' => basename($path),
-                    'status' => $request->status,
                     'url' => Storage::disk('s3')->url($path),
                     'size' => $request->file('images')->getSize(),
-                    'disk' => $request->disk,
                 ]);
             }
         }
