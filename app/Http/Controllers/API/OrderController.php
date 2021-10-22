@@ -49,7 +49,7 @@ class OrderController extends Controller
                 'orders.id AS order_id',
                 'orders.status AS order_status',
                 'orders.created_at AS date_order',
-                'orders.total',
+                DB::raw("CONVERT(orders.total, float) AS total"),
                 'images.name AS image_name',
                 'images.url AS image_url',
                 'images.imageable_type AS image_type',
