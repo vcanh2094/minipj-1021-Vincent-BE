@@ -32,7 +32,7 @@ class ProductTransformer extends Transformer
         return [
             'id' => (int) $product->id,
             'name' => $product->name,
-            'price' => $product->price,
+            'price' => (float) $product->price,
             'content' => $product->content,
             'description' => $product->description,
             'category_id' => $product->category_id,
