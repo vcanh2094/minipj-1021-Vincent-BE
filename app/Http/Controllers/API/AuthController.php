@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -93,7 +94,15 @@ class AuthController extends Controller
         $request->validated();
         $userId = auth()->user()->id;
         if($request->isChangePassword == true){
-            User::query()->where('id', $userId)->update(array_merge($request->validated(),['password' => bcrypt($request->new_password)]));
+            if(Hash::check($request->old_password, auth()->user()->password)){
+                User::query()->where('id', $userId)
+                    ->update(array_merge(
+                        $request->validated(),
+                        ['password' => bcrypt($request->new_password_confirmation)]
+                    ));
+            }else{
+                return responder()->error('incorrect', 'old password is incorrect')->respond();
+            }
         }else{
             User::query()->where('id', $userId)->update($request->validated());
         }
