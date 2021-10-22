@@ -25,7 +25,7 @@ class ChangeProfileUserRequest extends FormRequest
     {
         return [
             'name' => 'required|string|between:2,100',
-            'email' => 'required|string|email|max:100|unique:users',
+            'email' => "required|email|max:100|unique:users,email,".$this->user()->email.",email",
             'phone' => 'required|regex:/^([0-9\s\-\+\(\)]*)$/|min:10',
             'gender' => 'in:1,0',
             'birthday' => 'date_format:Y-m-d',
