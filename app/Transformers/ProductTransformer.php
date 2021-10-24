@@ -2,6 +2,7 @@
 
 namespace App\Transformers;
 
+use App\Models\Category;
 use App\Models\Product;
 use Flugg\Responder\Transformers\Transformer;
 
@@ -36,6 +37,7 @@ class ProductTransformer extends Transformer
             'content' => $product->content,
             'description' => $product->description,
             'category_id' => $product->category_id,
+            'category_name' => $product->category()->where('id', $product->category_id)->value('name'),
             'feature' => ($product->feature) == 1 ? ('Yes') : ('No'),
             'discount' => ($product->sale) <> 0 ? (($product->sale*100).'%') : ('No'),
             'images' => $product->images()->select(['id', 'name', 'url'])->get(),
