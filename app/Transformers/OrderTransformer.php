@@ -3,6 +3,7 @@
 namespace App\Transformers;
 
 use App\Models\Order;
+use App\Models\OrderDetail;
 use Flugg\Responder\Transformers\Transformer;
 
 class OrderTransformer extends Transformer
@@ -22,19 +23,17 @@ class OrderTransformer extends Transformer
     protected $load = [];
 
     /**
-     * @param \App\Transformers\Order $order
+     * @param Order $order
      * @return array
      */
-    public function transform(Order $order)
+    public function transform(Order $order): array
     {
         return [
-            'id' => $order->id,
+            'order_id' => $order->id,
             'date_order' => date('d-m-Y H:i:s', strtotime($order->created_at)),
-//                'user_id' => $order->user_id,
             'total' => (float) $order->total,
-//                'payment_method' => $order->payment_method,
             'status' => $order->status,
-            'order_details' => $order->order_details()->select('product_name')->get(),
+            'order_details' => $order->order_details()->select('product_id','product_name', 'product_price', 'product_quantity')->get(),
         ];
     }
 }

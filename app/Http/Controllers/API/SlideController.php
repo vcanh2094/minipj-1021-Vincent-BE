@@ -8,7 +8,6 @@ use App\Models\Image;
 use App\Models\Product;
 use App\Models\Slide;
 use App\Services\SlideService;
-use App\Traits\RespondsWithHttpStatus;
 use App\Transformers\SlideTransformer;
 use Flugg\Responder\Responder;
 use Illuminate\Http\JsonResponse;
@@ -18,8 +17,6 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class SlideController extends Controller
 {
-    use RespondsWithHttpStatus;
-
     /**
      * Store new slide.
      *
