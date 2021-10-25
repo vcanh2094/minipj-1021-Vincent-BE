@@ -38,41 +38,41 @@ class ProductController extends Controller
     public function index(Request $request): JsonResponse
     {
         $product_query = Product::query()->with(['category', 'images'])
-        ->when($request->has('category'), function($query) use ($request){
+            ->when($request->has('category'), function($query) use ($request){
                 return $query->where('category_id', $request->category)
-                            ->take(10);
-        })
-        ->when($request->has('feature'), function ($query){
+                    ->take(10);
+            })
+            ->when($request->has('feature'), function ($query){
                 return $query->where('feature', 1)
-                            ->orderByDesc('id')
-                            ->take(8);
-        })
-        ->when($request->has('sale'), function ($query){
+                    ->orderByDesc('id')
+                    ->take(8);
+            })
+            ->when($request->has('sale'), function ($query){
                 return $query->where('sale', '>', 0)
-                            ->orderByDesc('id')
-                            ->take(9);
-        })
-        ->when($request->has('id'), function ($query) use ($request){
+                    ->orderByDesc('id')
+                    ->take(9);
+            })
+            ->when($request->has('id'), function ($query) use ($request){
                 return $query->where('id', $request->id);
-        })
-        ->when($request->has('search'), function ($query) use ($request){
+            })
+            ->when($request->has('search'), function ($query) use ($request){
                 return $query->where('name', 'like','%'.$request->search.'%')
-                            ->orWhere('content', 'like', '%'.$request->search.'%')
-                            ->orWhere('category_id', 'like', '%'.$request->search.'%')
-                            ->orderBy('id');
-        })
-        ->when($request->has('asc'), function($query){
+                    ->orWhere('content', 'like', '%'.$request->search.'%')
+                    ->orWhere('category_id', 'like', '%'.$request->search.'%')
+                    ->orderBy('id');
+            })
+            ->when($request->has('asc'), function($query){
                 return $query->orderBy('price');
-        })
-        ->when($request->has('desc'), function($query){
+            })
+            ->when($request->has('desc'), function($query){
                 return $query->orderByDesc('price');
-        })
-        ->when($request->has('sort-by-sale'), function($query){
+            })
+            ->when($request->has('sort-by-sale'), function($query){
                 return $query->orderByDesc('sale');
-        })
-        ->when($request->has('date-update'), function($query){
+            })
+            ->when($request->has('date-update'), function($query){
                 return $query->orderByDesc('updated_at');
-        })
+            })
         ;
         return responder()->success($product_query->paginate(20), new ProductTransformer)->respond();
     }
@@ -106,9 +106,9 @@ class ProductController extends Controller
         Product::query()->where('id', $product)->update($request->validated());
         if($request->hasFile('images')){
             $path = $request->file('images')->store('images/vcanh', 's3');
-            $isImage = Image::query()->where('imageable_id', $product)->get();
+            $isImage = Image::where('imageable_id', $product)->first();
             if(!$isImage){
-                $productService->handleUpdateProductImage($request->images, $path, $product);
+                $productService->handleUpdateProductImage($request->file('images'), $path, $product);
             }else{
                 Image::query()->where('imageable_id', $product)->update([
                     'name' => basename($path),
