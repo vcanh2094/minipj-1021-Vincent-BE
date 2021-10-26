@@ -23,7 +23,7 @@ class FavoriteController extends Controller
     public function index(): JsonResponse
     {
         $this->user = JWTAuth::parseToken()->authenticate();
-        $products = DB::table('favorites')
+        $products = Favorite::query()
             ->join('products', 'favorites.product_id', '=', 'products.id')
             ->join('images', 'products.id', '=', 'imageable_id')
             ->select('favorites.product_id',
@@ -33,7 +33,6 @@ class FavoriteController extends Controller
                 'products.sale AS discount',
                 'products.content',
                 'products.feature',
-                'images.name AS image_name',
                 'images.url AS image_url',
                 'images.imageable_type AS image_type'
             )
