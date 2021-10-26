@@ -19,7 +19,7 @@ class Order extends Model
     {
         return $this->belongsTo(User::class);
     }
-    public function order_details(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function orderDetails()
     {
         return $this->hasMany(OrderDetail::class);
     }
