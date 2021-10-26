@@ -43,13 +43,14 @@ Route::get('products', [ProductController::class, 'index']); //get Product list(
 
 //Admin API
 Route::post('admin-login', [AdminController::class, 'login']);
-Route::post('admin-register', [AdminController::class, 'register']);
 Route::group([
     'prefix' => 'admin',
     'middleware' => ['assign.guard:admins','jwt.auth']
 ], function(){
+    Route::post('admin-register', [AdminController::class, 'register']);
     Route::post('create-banner', [SlideController::class, 'store']);
     Route::apiResource('products', ProductController::class)->except(['create', 'edit']); //CRUD Products
+    Route::post('logout', [AdminController::class, 'logout']);
 });
 
 

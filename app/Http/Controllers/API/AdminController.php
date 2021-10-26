@@ -6,22 +6,19 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\LoginAdminRequest;
 use App\Http\Requests\RegisterAdminRequest;
 use App\Models\Admin;
-use Flugg\Responder\Responder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Config;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AdminController extends Controller
 {
     /**
-     * register admin
-     *
      * @param RegisterAdminRequest $request
      * @return JsonResponse
      */
     public function register(RegisterAdminRequest $request): JsonResponse
     {
+        JWTAuth::parseToken()->authenticate();
         $admin = Admin::create(array_merge($request->validated(), ['password' => bcrypt($request->password)]));
         return responder()->success($admin)->respond();
     }
@@ -39,6 +36,17 @@ class AdminController extends Controller
             return responder()->error('401', 'Invalid email or password')->respond(401);
         }
         return $this->create_new_token($token);
+    }
+
+    /**
+     * logout admin
+     *
+     * @return JsonResponse
+     */
+    public function logout()
+    {
+        auth()->logout();
+        return responder()->success()->respond();
     }
 
     /**

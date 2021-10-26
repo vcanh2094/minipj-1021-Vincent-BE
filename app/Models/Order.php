@@ -3,8 +3,6 @@
 namespace App\Models;
 
 use App\Transformers\OrderTransformer;
-use Flugg\Responder\Contracts\Transformable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Order extends Model
@@ -15,16 +13,12 @@ class Order extends Model
         'payment_method',
         'status',
     ];
-    public function user(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    public function user()
     {
         return $this->belongsTo(User::class);
     }
-    public function order_details(): \Illuminate\Database\Eloquent\Relations\HasMany
+    public function orderDetails()
     {
         return $this->hasMany(OrderDetail::class);
-    }
-    public function transformer(): string
-    {
-        return OrderTransformer::class;
     }
 }
