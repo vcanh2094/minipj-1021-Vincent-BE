@@ -4,7 +4,6 @@ namespace App\Models;
 
 use App\Transformers\SlideTransformer;
 use Flugg\Responder\Contracts\Transformable;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class Slide extends Model implements Transformable

@@ -5,29 +5,20 @@ namespace App\Http\Controllers\API;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\StoreProductRequest;
 use App\Http\Requests\UpdateProductRequest;
-use App\Models\Category;
 use App\Models\Favorite;
 use App\Models\Image;
 use App\Models\Product;
 use App\Services\ProductService;
 use App\Transformers\ProductTransformer;
-use Flugg\Responder\Http\Responses\SuccessResponseBuilder;
-use Flugg\Responder\Responder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use phpDocumentor\Reflection\PseudoTypes\LowercaseString;
-use Symfony\Component\HttpFoundation\Response;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 
 class ProductController extends Controller
 {
     protected $user;
-    private $products;
 
     /**
      * show list products
@@ -86,7 +77,7 @@ class ProductController extends Controller
      */
     public function store( StoreProductRequest $request, ProductService $productService): JsonResponse
     {
-        $this->admin = JWTAuth::parseToken()->authenticate();
+        JWTAuth::parseToken()->authenticate();
         $product = Product::create($request->validated());
         $productService->handleUploadProductImage($request->images,$product->id);
         return responder()->success(Product::query()->where('id', $product->id)->get(), new ProductTransformer)->respond();
@@ -100,9 +91,9 @@ class ProductController extends Controller
      * @param ProductService $productService
      * @return JsonResponse
      */
-    public function update(UpdateProductRequest $request, $product, ProductService $productService): JsonResponse
+    public function update(UpdateProductRequest $request, $product, ProductService $productService)
     {
-        $this->admin = JWTAuth::parseToken()->authenticate();
+        JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->update($request->validated());
         if($request->hasFile('images')){
             $path = $request->file('images')->store('images/vcanh', 's3');
@@ -121,14 +112,14 @@ class ProductController extends Controller
     }
 
     /**
-     * delete product
+     * Delete product
      *
      * @param $product
      * @return JsonResponse
      */
     public function destroy($product): JsonResponse
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
+        JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->delete();
         Image::query()->where('imageable_id', $product)->delete();
         Favorite::query()->where('product_id', $product)->delete();

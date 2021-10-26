@@ -22,9 +22,9 @@ class OrderController extends Controller
      *
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index()
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
+        JWTAuth::parseToken()->authenticate();
         $query = Order::query();
         return responder()->success($query->paginate(20), new OrderTransformer)->respond();
     }
@@ -35,37 +35,10 @@ class OrderController extends Controller
      * @param $order
      * @return JsonResponse
      */
-    public function show($order): JsonResponse
+    public function show($order)
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
-        $query = Order::query()->where('orders.id', $order)
-            ->join('order_details', 'orders.id', '=', 'order_details.order_id')
-            ->join('products', 'order_details.product_id', '=', 'products.id')
-            ->join('images', 'products.id', '=', 'imageable_id')
-            ->select([
-                'orders.id AS order_id',
-                'orders.status AS order_status',
-                'orders.created_at AS date_order',
-                'orders.total',
-                'images.url AS image_url',
-                'images.imageable_type AS image_type',
-                'order_details.product_name',
-                'order_details.product_price',
-                'order_details.product_quantity'
-            ])
-            ->get();
-        return responder()->success($query)->respond();
-
-//        return responder()->success(Order::where('id', $order), OrderTransformer::class)
-//                ->with([
-//                    'order_details' => function($query){
-//                        $query->select('product_name','product_price', 'product_quantity');
-//                    },
-//                    'order_details.products.images' =>function($query){
-//                        $query->select('url', 'imageable_type');
-//                    }
-//                ])
-//                ->respond();
+        JWTAuth::parseToken()->authenticate();
+        return responder()->success(Order::query()->where('id', $order), new OrderTransformer)->respond();
     }
 
     /**
@@ -74,9 +47,9 @@ class OrderController extends Controller
      * @param StoreOrderRequest $request
      * @return JsonResponse
      */
-    public function store(StoreOrderRequest $request): JsonResponse
+    public function store(StoreOrderRequest $request)
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
+        JWTAuth::parseToken()->authenticate();
         $order = Order::create(array_merge($request->validated(),['user_id' => $request->user()->id]));
         foreach( $request->products as $product => $value){
             OrderDetail::create([

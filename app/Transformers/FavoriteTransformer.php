@@ -2,10 +2,10 @@
 
 namespace App\Transformers;
 
-use App\Models\OrderDetail;
+use App\Models\Favorite;
 use Flugg\Responder\Transformers\Transformer;
 
-class OrderDetailTransformer extends Transformer
+class FavoriteTransformer extends Transformer
 {
     /**
      * List of available relations.
@@ -26,13 +26,14 @@ class OrderDetailTransformer extends Transformer
     /**
      * Transform the model.
      *
-     * @param OrderDetail $orderDetail
+     * @param Favorite $favorite
      * @return array
      */
-    public function transform(OrderDetail $orderDetail)
+    public function transform(Favorite $favorite)
     {
         return [
-            'product_quantity' => (int) $orderDetail->product_quantity,
+            'id' => (int) $favorite->id,
+            'user_id' => $favorite->user_id,
         ];
     }
 }
