@@ -67,6 +67,14 @@ class AuthController extends Controller
     }
 
     /**
+     * @return mixed
+     */
+    public function refresh() {
+        return $this->create_new_token(auth()->refresh());
+    }
+
+
+    /**
      * Create new token
      *
      * @param $token

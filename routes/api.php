@@ -31,6 +31,7 @@ Route::group([
 ], function () {
     Route::get('user-profile', [AuthController::class, 'user_profile']);
     Route::patch('change-profile', [AuthController::class, 'change_profile']);
+    Route::post('refresh', [AuthController::class, 'refresh']);
     Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
     Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
     Route::post('logout', [AuthController::class, 'logout']);
