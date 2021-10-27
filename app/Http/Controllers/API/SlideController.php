@@ -20,7 +20,7 @@ class SlideController extends Controller
      * @param SlideService $slideService
      * @return JsonResponse
      */
-    public function store(StoreSlideRequest $request, SlideService $slideService): JsonResponse
+    public function store(StoreSlideRequest $request, SlideService $slideService)
     {
         JWTAuth::parseToken()->authenticate();
         $slide = Slide::create($request->validated());
@@ -34,7 +34,7 @@ class SlideController extends Controller
      * @param Responder $responder
      * @return JsonResponse
      */
-    public function show(Responder $responder): JsonResponse
+    public function show(Responder $responder)
     {
         return $responder->success(Slide::all()->take(5), new SlideTransformer)->respond();
     }

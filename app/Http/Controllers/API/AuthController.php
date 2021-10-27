@@ -18,7 +18,7 @@ class AuthController extends Controller
      * @param RegisterUserRequest $request
      * @return JsonResponse
      */
-    public function register(RegisterUserRequest $request): JsonResponse
+    public function register(RegisterUserRequest $request)
     {
         $user = User::create(array_merge($request->validated(), ['password' => bcrypt($request->password)]));
         return responder()->success($user)->respond();
@@ -30,12 +30,12 @@ class AuthController extends Controller
      * @param LoginUserRequest $request
      * @return JsonResponse
      */
-    public function login(LoginUserRequest $request): JsonResponse
+    public function login(LoginUserRequest $request)
     {
         if (!$token = auth()->attempt($request->validated())) {
             return responder()->error(401, 'Invalid email or password')->respond();
         }else{
-            return $this->create_new_token($token);
+            return $this->createNewToken($token);
         }
 
     }
@@ -45,7 +45,7 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function logout(): JsonResponse
+    public function logout()
     {
         auth()->logout();
         return responder()->success()->respond();
@@ -56,7 +56,7 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function user_profile(): JsonResponse
+    public function userProfile()
     {
         return responder()->success(auth()->user())->respond();
     }
@@ -67,7 +67,7 @@ class AuthController extends Controller
      * @return JsonResponse
      */
     public function refresh() {
-        return $this->create_new_token(auth()->refresh());
+        return $this->createNewToken(auth()->refresh());
     }
 
 
@@ -77,7 +77,7 @@ class AuthController extends Controller
      * @param $token
      * @return JsonResponse
      */
-    protected function create_new_token($token)
+    protected function createNewToken($token)
     {
         return responder()->success([
             'access_token' => $token,
@@ -94,7 +94,7 @@ class AuthController extends Controller
      * @param ChangeProfileUserRequest $request
      * @return JsonResponse
      */
-    public function change_profile(ChangeProfileUserRequest $request): JsonResponse
+    public function changeProfile(ChangeProfileUserRequest $request)
     {
         $request->validated();
         $userId = auth()->user()->id;

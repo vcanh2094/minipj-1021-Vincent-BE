@@ -29,8 +29,8 @@ Route::group([
     'prefix' => 'user',
     'middleware' => ['assign.guard:users', 'jwt.auth'],
 ], function () {
-    Route::get('user-profile', [AuthController::class, 'user_profile']);
-    Route::patch('change-profile', [AuthController::class, 'change_profile']);
+    Route::get('user-profile', [AuthController::class, 'userProfile']);
+    Route::patch('change-profile', [AuthController::class, 'changeProfile']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
     Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);

@@ -16,7 +16,7 @@ class AdminController extends Controller
      * @param RegisterAdminRequest $request
      * @return JsonResponse
      */
-    public function register(RegisterAdminRequest $request): JsonResponse
+    public function register(RegisterAdminRequest $request)
     {
         JWTAuth::parseToken()->authenticate();
         $admin = Admin::create(array_merge($request->validated(), ['password' => bcrypt($request->password)]));
@@ -29,13 +29,13 @@ class AdminController extends Controller
      * @param LoginAdminRequest $request
      * @return JsonResponse
      */
-    public function login(LoginAdminRequest $request): JsonResponse
+    public function login(LoginAdminRequest $request)
     {
         config()->set( 'auth.defaults.guard', 'admins' );
         if (!$token = auth()->attempt($request->validated())) {
             return responder()->error('401', 'Invalid email or password')->respond(401);
         }
-        return $this->create_new_token($token);
+        return $this->createNewToken($token);
     }
 
     /**
@@ -55,7 +55,7 @@ class AdminController extends Controller
      * @param $token
      * @return JsonResponse
      */
-    protected function create_new_token($token): JsonResponse
+    protected function createNewToken($token)
     {
         return responder()->success(['access_token' => $token, 'token_type' => 'bearer', 'expires_in' => auth()->factory()->getTTL() * 60,])->respond();
     }

@@ -26,9 +26,9 @@ class ProductController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function index(Request $request): JsonResponse
+    public function index(Request $request)
     {
-        $product_query = Product::query()->with(['category', 'images'])
+        $productQuery = Product::query()->with(['category', 'images'])
             ->when($request->has('category'), function($query) use ($request){
                 return $query->where('category_id', $request->category)
                     ->take(10);
@@ -65,7 +65,7 @@ class ProductController extends Controller
                 return $query->orderByDesc('updated_at');
             })
         ;
-        return responder()->success($product_query->paginate(20), new ProductTransformer)->respond();
+        return responder()->success($productQuery->paginate(20), new ProductTransformer)->respond();
     }
 
     /**
@@ -75,7 +75,7 @@ class ProductController extends Controller
      * @param ProductService $productService
      * @return JsonResponse
      */
-    public function store( StoreProductRequest $request, ProductService $productService): JsonResponse
+    public function store( StoreProductRequest $request, ProductService $productService)
     {
         JWTAuth::parseToken()->authenticate();
         $product = Product::create($request->validated());
@@ -117,7 +117,7 @@ class ProductController extends Controller
      * @param $product
      * @return JsonResponse
      */
-    public function destroy($product): JsonResponse
+    public function destroy($product)
     {
         JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->delete();
