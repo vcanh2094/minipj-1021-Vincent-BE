@@ -44,6 +44,7 @@ class ProductController extends Controller
                 return $query->where('name', 'like','%'.$request->search.'%')
                     ->orWhere('content', 'like', '%'.$request->search.'%')
                     ->orWhere('category_id', 'like', '%'.$request->search.'%')
+                    ->orWhere('price', 'like', '%'.$request->search.'%')
                     ->orderBy('id');
             })
             ->when($request->has('asc'), function($query){
@@ -60,10 +61,6 @@ class ProductController extends Controller
             })
         ;
         return responder()->success($productQuery->paginate($request->perPage), new ProductTransformer)->with(['category', 'images'])->respond();
-    }
-
-    public function show($product){
-        return responder()->success(Product::where('id', $product), new ProductTransformer)->with(['category','images'])->respond();
     }
 
     /**
