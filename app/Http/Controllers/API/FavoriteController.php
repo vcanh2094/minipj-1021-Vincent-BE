@@ -16,11 +16,10 @@ class FavoriteController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
-        $query = Favorite::query()->where('user_id', $this->user->id);
-        return responder()->success($query->paginate(20), new FavoriteTransformer)->respond();
+        $query = Favorite::query()->where('user_id', auth()->user()->id);
+        return responder()->success($query->paginate($request->perPage), new FavoriteTransformer)->respond();
     }
 
     /**
@@ -31,24 +30,23 @@ class FavoriteController extends Controller
      */
     public function store(Request $request)
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
         $favorite_product = Favorite::query()
-            ->where('user_id', $this->user->id)
-            ->where('product_id', '=' ,$request->product_id)->first();
-        $user = Favorite::where('user_id', $this->user->id)->first();
+            ->where('user_id', auth()->user()->id)
+            ->where('product_id', $request->product_id)->first();
+        $user = Favorite::where('user_id', auth()->user()->id)->first();
         if ($user && !$favorite_product){
             Favorite::create([
-                'user_id' => $this->user->id,
+                'user_id' => auth()->user()->id,
                 'product_id' => $request->product_id,
             ]);
             return responder()->success()->respond();
         }
         else if($user && $favorite_product){
-            return responder()->error('duplicate_product', 'This product is already in your favorite list')->respond();
+            return responder()->error(500, 'This product is already in your favorite list')->respond(500);
         }
         else{
             Favorite::create([
-                'user_id' => $this->user->id,
+                'user_id' => auth()->user()->id,
                 'product_id' => $request->product_id,
             ]);
             return responder()->success()->respond();
@@ -64,9 +62,8 @@ class FavoriteController extends Controller
      */
     public function destroy(Request $request, $product)
     {
-        $this->user = JWTAuth::parseToken()->authenticate();
         Favorite::query()
-            ->where('user_id', $this->user->id)
+            ->where('user_id',auth()->user()->id)
             ->where('product_id', $product)->delete();
         return responder()->success()->respond();
     }
