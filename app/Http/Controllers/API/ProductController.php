@@ -28,23 +28,17 @@ class ProductController extends Controller
      */
     public function index(Request $request)
     {
-        $productQuery = Product::query()->with(['category', 'images'])
+        $productQuery = Product::query()
             ->when($request->has('category'), function($query) use ($request){
-                return $query->where('category_id', $request->category)
-                    ->take(10);
+                return $query->where('category_id', $request->category);
             })
             ->when($request->has('feature'), function ($query){
                 return $query->where('feature', 1)
-                    ->orderByDesc('id')
-                    ->take(8);
+                    ->orderByDesc('id');
             })
             ->when($request->has('sale'), function ($query){
                 return $query->where('sale', '>', 0)
-                    ->orderByDesc('id')
-                    ->take(9);
-            })
-            ->when($request->has('id'), function ($query) use ($request){
-                return $query->where('id', $request->id);
+                    ->orderByDesc('id');
             })
             ->when($request->has('search'), function ($query) use ($request){
                 return $query->where('name', 'like','%'.$request->search.'%')
@@ -65,7 +59,11 @@ class ProductController extends Controller
                 return $query->orderByDesc('updated_at');
             })
         ;
-        return responder()->success($productQuery->paginate(20), new ProductTransformer)->respond();
+        return responder()->success($productQuery->paginate($request->perPage), new ProductTransformer)->with(['category', 'images'])->respond();
+    }
+
+    public function show($product){
+        return responder()->success(Product::where('id', $product), new ProductTransformer)->with(['category','images'])->respond();
     }
 
     /**
@@ -77,10 +75,9 @@ class ProductController extends Controller
      */
     public function store( StoreProductRequest $request, ProductService $productService)
     {
-        JWTAuth::parseToken()->authenticate();
         $product = Product::create($request->validated());
         $productService->handleUploadProductImage($request->images,$product->id);
-        return responder()->success(Product::query()->where('id', $product->id)->get(), new ProductTransformer)->respond();
+        return responder()->success($product, new ProductTransformer)->respond();
     }
 
     /**
@@ -93,7 +90,6 @@ class ProductController extends Controller
      */
     public function update(UpdateProductRequest $request, $product, ProductService $productService)
     {
-        JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->update($request->validated());
         if($request->hasFile('images')){
             $path = $request->file('images')->store('images/vcanh', 's3');
@@ -119,7 +115,6 @@ class ProductController extends Controller
      */
     public function destroy($product)
     {
-        JWTAuth::parseToken()->authenticate();
         Product::query()->where('id', $product)->delete();
         Image::query()->where('imageable_id', $product)->delete();
         Favorite::query()->where('product_id', $product)->delete();

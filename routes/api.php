@@ -6,6 +6,10 @@ use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\ProductController;
 use App\Http\Controllers\API\SearchController;
 use App\Http\Controllers\API\SlideController;
+use App\Models\Order;
+use App\Models\Product;
+use App\Transformers\OrderTransformer;
+use App\Transformers\ProductTransformer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\API\AuthController;
@@ -33,13 +37,19 @@ Route::group([
     Route::patch('change-profile', [AuthController::class, 'changeProfile']);
     Route::post('refresh', [AuthController::class, 'refresh']);
     Route::apiResource('favorites', FavoriteController::class)->only(['index', 'store', 'destroy']);
-    Route::apiResource('orders', OrderController::class)->only(['index', 'show', 'store']);
+    Route::apiResource('orders', OrderController::class)->only(['index', 'store']);
+    Route::get('orders/{order}', function (Order $order){
+        return responder()->success($order, new OrderTransformer)->respond();
+    });
     Route::post('logout', [AuthController::class, 'logout']);
 });
 //Home page API
 Route::get('categories', [CategoryController::class, 'index']);
-Route::get('banners', [SlideController::class, 'show']);
+Route::get('banners', [SlideController::class, 'index']);
 Route::get('products', [ProductController::class, 'index']); //get Product list(feature/sale/byCategory/search)
+Route::get('products/{product}', function (Product $product){
+    return responder()->success($product, new ProductTransformer)->with(['category','images'])->respond();
+});
 
 //Admin API
 Route::post('admin-login', [AdminController::class, 'login']);

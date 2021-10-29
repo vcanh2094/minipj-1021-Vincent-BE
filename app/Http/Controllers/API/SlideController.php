@@ -34,7 +34,7 @@ class SlideController extends Controller
      * @param Responder $responder
      * @return JsonResponse
      */
-    public function show(Responder $responder)
+    public function index(Responder $responder)
     {
         return $responder->success(Slide::query()->where('status', 1)->orderByDesc('updated_at')->take(5), new SlideTransformer)->respond();
     }
