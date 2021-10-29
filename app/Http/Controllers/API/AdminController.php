@@ -18,7 +18,6 @@ class AdminController extends Controller
      */
     public function register(RegisterAdminRequest $request)
     {
-        JWTAuth::parseToken()->authenticate();
         $admin = Admin::create($request->validated());
         return responder()->success($admin)->respond();
     }
