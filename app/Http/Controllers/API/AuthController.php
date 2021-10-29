@@ -20,7 +20,7 @@ class AuthController extends Controller
      */
     public function register(RegisterUserRequest $request)
     {
-        $user = User::create(array_merge($request->validated(), ['password' => bcrypt($request->password)]));
+        $user = User::create($request->validated());
         return responder()->success($user)->respond();
     }
 
@@ -33,7 +33,7 @@ class AuthController extends Controller
     public function login(LoginUserRequest $request)
     {
         if (!$token = auth()->attempt($request->validated())) {
-            return responder()->error(401, 'Invalid email or password')->respond();
+            return responder()->error(401, 'Invalid email or password')->respond(401);
         }else{
             return $this->createNewToken($token);
         }
@@ -106,7 +106,7 @@ class AuthController extends Controller
                         ['password' => bcrypt($request->new_password_confirmation)]
                     ));
             }else{
-                return responder()->error('incorrect', 'old password is incorrect')->respond();
+                return responder()->error(401, 'Old password is incorrect')->respond(401);
             }
         }else{
             User::query()->where('id', $userId)->update($request->validated());

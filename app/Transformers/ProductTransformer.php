@@ -13,7 +13,10 @@ class ProductTransformer extends Transformer
      *
      * @var string[]
      */
-    protected $relations = [];
+    protected $relations = [
+        'category' => CategoryTransformer::class,
+        'images' => ImageTransformer::class
+    ];
 
     /**
      * List of autoloaded default relations.
@@ -25,7 +28,7 @@ class ProductTransformer extends Transformer
     /**
      * Transform the model.
      *
-     * @param  \App\Product $product
+     * @param Product $product
      * @return array
      */
     public function transform(Product $product)
@@ -36,11 +39,8 @@ class ProductTransformer extends Transformer
             'price' => (float) $product->price,
             'content' => $product->content,
             'description' => $product->description,
-            'category_id' => $product->category_id,
-            'category_name' => $product->category()->where('id', $product->category_id)->value('name'),
             'feature' => ($product->feature) == 1 ? ('Yes') : ('No'),
             'discount' => ($product->sale) <> 0 ? (($product->sale*100).'%') : ('No'),
-            'images' => $product->images()->select(['id', 'name', 'url'])->get(),
             'date_update' => date('d-m-Y H:i', strtotime($product->updated_at)),
         ];
     }

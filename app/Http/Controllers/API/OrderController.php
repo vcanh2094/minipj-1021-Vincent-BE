@@ -22,23 +22,10 @@ class OrderController extends Controller
      *
      * @return JsonResponse
      */
-    public function index()
+    public function index(Request $request)
     {
-        JWTAuth::parseToken()->authenticate();
-        $query = Order::query();
-        return responder()->success($query->paginate(20), new OrderTransformer)->respond();
-    }
-
-    /**
-     * Show detail of an order
-     *
-     * @param $order
-     * @return JsonResponse
-     */
-    public function show($order)
-    {
-        JWTAuth::parseToken()->authenticate();
-        return responder()->success(Order::query()->where('id', $order), new OrderTransformer)->respond();
+        $query = Order::query()->where('user_id', auth()->user()->id);
+        return responder()->success($query->paginate($request->perPage), new OrderTransformer)->respond();
     }
 
     /**
@@ -49,17 +36,16 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        JWTAuth::parseToken()->authenticate();
         $order = Order::create(array_merge($request->validated(),['user_id' => $request->user()->id]));
-        foreach( $request->products as $product => $value){
-            OrderDetail::create([
-                'order_id' => $order->id,
-                'product_id' => $value['id'],
-                'product_name' => $value['name'],
-                'product_price' => $value['price'],
-                'product_quantity' => $value['quantity'],
-            ]);
+        foreach ($request->products as $product){
+            $orderDetails[] = [
+                'product_id' => $product['id'],
+                'product_name' => $product['name'],
+                'product_price' => $product['price'],
+                'product_quantity' => $product['quantity'],
+            ];
         }
+        $order->orderDetails()->createMany($orderDetails);
         return responder()->success($order, OrderTransformer::class)->respond();
     }
 }

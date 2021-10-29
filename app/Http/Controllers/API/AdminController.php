@@ -19,7 +19,7 @@ class AdminController extends Controller
     public function register(RegisterAdminRequest $request)
     {
         JWTAuth::parseToken()->authenticate();
-        $admin = Admin::create(array_merge($request->validated(), ['password' => bcrypt($request->password)]));
+        $admin = Admin::create($request->validated());
         return responder()->success($admin)->respond();
     }
 
@@ -33,7 +33,7 @@ class AdminController extends Controller
     {
         config()->set( 'auth.defaults.guard', 'admins' );
         if (!$token = auth()->attempt($request->validated())) {
-            return responder()->error('401', 'Invalid email or password')->respond(401);
+            return responder()->error(401, 'Invalid email or password')->respond(401);
         }
         return $this->createNewToken($token);
     }
