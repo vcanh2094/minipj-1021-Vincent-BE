@@ -36,6 +36,6 @@ class SlideController extends Controller
      */
     public function show(Responder $responder)
     {
-        return $responder->success(Slide::all()->take(5), new SlideTransformer)->respond();
+        return $responder->success(Slide::query()->where('status', 1)->orderByDesc('updated_at')->take(5), new SlideTransformer)->respond();
     }
 }
