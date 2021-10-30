@@ -14,7 +14,8 @@ class OrderTransformer extends Transformer
      * @var string[]
      */
     protected $relations = [
-        'order_details' => OrderDetailTransformer::class
+        'order_details' => OrderDetailTransformer::class,
+        'address' => AddressTransformer::class,
     ];
 
     /**
