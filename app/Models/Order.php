@@ -12,6 +12,7 @@ class Order extends Model
         'total',
         'payment_method',
         'status',
+        'address_id'
     ];
     public function user()
     {
@@ -20,5 +21,8 @@ class Order extends Model
     public function orderDetails()
     {
         return $this->hasMany(OrderDetail::class);
+    }
+    public function address(){
+        return $this->belongsTo(Address::class);
     }
 }
