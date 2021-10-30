@@ -36,7 +36,7 @@ class OrderController extends Controller
      */
     public function store(StoreOrderRequest $request)
     {
-        $order = Order::create(array_merge($request->validated(),['user_id' => $request->user()->id]));
+        $order = Order::create(array_merge($request->validated(),['user_id' => auth()->user()->id]));
         foreach ($request->products as $product){
             $orderDetails[] = [
                 'product_id' => $product['id'],
