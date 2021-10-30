@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\API\AddressController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\FavoriteController;
 use App\Http\Controllers\API\OrderController;
@@ -41,6 +42,8 @@ Route::group([
     Route::get('orders/{order}', function (Order $order){
         return responder()->success($order, new OrderTransformer)->respond();
     });
+    Route::apiResource('addresses', AddressController::class)->only('index', 'store');
+    Route::patch('change-address', [AddressController::class, 'update']);
     Route::post('logout', [AuthController::class, 'logout']);
 });
 //Home page API

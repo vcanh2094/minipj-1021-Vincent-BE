@@ -64,4 +64,8 @@ class User extends Authenticatable implements JWTSubject, Transformable
     {
         $this->attributes['password'] = bcrypt($value);
     }
+
+    public function address(){
+        return $this->hasOne(Address::class);
+    }
 }
