@@ -13,4 +13,7 @@ class Address extends Model
         'ward',
         'street_name',
     ];
+    public function user(){
+        return $this->belongsTo(User::class);
+    }
 }
