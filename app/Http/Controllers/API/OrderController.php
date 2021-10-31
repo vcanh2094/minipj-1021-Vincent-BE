@@ -24,7 +24,7 @@ class OrderController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Order::query()->where('user_id', auth()->user()->id);
+        $query = Order::query()->where('user_id', auth()->user()->id)->orderByDesc('created_at');
         return responder()->success($query->paginate($request->perPage), new OrderTransformer)->respond();
     }
 
