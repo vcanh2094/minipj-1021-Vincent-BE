@@ -5,7 +5,6 @@ use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\FavoriteController;
 use App\Http\Controllers\API\OrderController;
 use App\Http\Controllers\API\ProductController;
-use App\Http\Controllers\API\SearchController;
 use App\Http\Controllers\API\SlideController;
 use App\Models\Order;
 use App\Models\Product;
@@ -65,6 +64,9 @@ Route::group([
     Route::apiResource('products', ProductController::class)->except(['create', 'edit']); //CRUD Products
     Route::post('logout', [AdminController::class, 'logout']);
 });
+
+
+Route::post('is-favorite', [FavoriteController::class, 'isFavorite']);
 
 
 
