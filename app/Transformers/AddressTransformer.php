@@ -20,7 +20,9 @@ class AddressTransformer extends Transformer
      *
      * @var array
      */
-    protected $load = [];
+    protected $load = [
+        'user' => UserTransformer::class,
+    ];
 
     /**
      * Transform the model.
