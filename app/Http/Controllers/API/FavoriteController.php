@@ -67,4 +67,23 @@ class FavoriteController extends Controller
             ->where('product_id', $product)->delete();
         return responder()->success()->respond();
     }
+
+
+
+    public function isFavorite(Request $request){
+        $user = auth()->user();
+        if(!$user){
+            return 'nope';
+        }else{
+            $query = Favorite::query()
+                ->where('user_id', auth()->user()->id)
+                ->where('product_id', $request->product_id)
+                ->value('product_id');
+            if($query == ''){
+                return 'nope';
+            }else{
+                return 'yes';
+            }
+        }
+    }
 }

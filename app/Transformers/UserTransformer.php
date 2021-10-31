@@ -12,7 +12,9 @@ class UserTransformer extends Transformer
      *
      * @var string[]
      */
-    protected $relations = [];
+    protected $relations = [
+        'address' => AddressTransformer::class
+    ];
 
     /**
      * List of autoloaded default relations.
@@ -24,7 +26,7 @@ class UserTransformer extends Transformer
     /**
      * Transform the model.
      *
-     * @param  \App\Models\User $user
+     * @param User $user
      * @return array
      */
     public function transform(User $user)
