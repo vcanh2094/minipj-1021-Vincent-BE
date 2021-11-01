@@ -41,11 +41,14 @@ class ProductController extends Controller
                     ->orderByDesc('id');
             })
             ->when($request->has('search'), function ($query) use ($request){
-                return $query->where('name', 'like','%'.$request->search.'%')
-                    ->orWhere('content', 'like', '%'.$request->search.'%')
-                    ->orWhere('category_id', 'like', '%'.$request->search.'%')
-                    ->orWhere('price', 'like', '%'.$request->search.'%')
-                    ->orderBy('id');
+                $q = $request->search;
+                return
+                    $query->where(strtolower('name'), 'like', '%'.strtolower($q).'%')
+                        ->orWhere(strtolower('content'), 'like', '%'.strtolower($q).'%')
+                        ->orWhere(strtolower('description'), 'like', '%'.strtolower($q).'%')
+                        ->orWhere('category_id', 'like', '%'.strtolower($q).'%')
+                        ->orWhere('price', 'like', '%'.strtolower($q).'%')
+                        ->orderBy('id');
             })
             ->when($request->has('asc'), function($query){
                 return $query->orderBy('price');
