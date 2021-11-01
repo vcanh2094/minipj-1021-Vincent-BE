@@ -12,6 +12,7 @@ use App\Services\ProductService;
 use App\Transformers\ProductTransformer;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -43,11 +44,10 @@ class ProductController extends Controller
             ->when($request->has('search'), function ($query) use ($request){
                 $q = $request->search;
                 return
-                    $query->where(strtolower('name'), 'like', '%'.strtolower($q).'%')
-                        ->orWhere(strtolower('content'), 'like', '%'.strtolower($q).'%')
-                        ->orWhere(strtolower('description'), 'like', '%'.strtolower($q).'%')
-                        ->orWhere('category_id', 'like', '%'.strtolower($q).'%')
-                        ->orWhere('price', 'like', '%'.strtolower($q).'%')
+                    $query->where(DB::raw('LOWER(name)'), 'like', '%'.strtolower($q).'%')
+                        ->orWhere(DB::raw('LOWER(content)'), 'like', '%'.strtolower($q).'%')
+                        ->orWhere('category_id', 'like', '%'.$q.'%')
+                        ->orWhere('price', 'like', '%'.$q.'%')
                         ->orderBy('id');
             })
             ->when($request->has('asc'), function($query){
