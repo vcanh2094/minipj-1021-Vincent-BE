@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AddressController;
+use App\Http\Controllers\API\Admin\AdminProductController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\FavoriteController;
 use App\Http\Controllers\API\OrderController;
@@ -61,6 +62,7 @@ Route::group([
 ], function(){
     Route::post('admin-register', [AdminController::class, 'register']);
     Route::post('create-banner', [SlideController::class, 'store']);
+    Route::get('product-list', [AdminProductController::class, 'index']);
     Route::apiResource('products', ProductController::class)->except(['create', 'edit']); //CRUD Products
     Route::post('logout', [AdminController::class, 'logout']);
 });
