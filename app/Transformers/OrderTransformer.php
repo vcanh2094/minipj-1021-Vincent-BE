@@ -33,7 +33,7 @@ class OrderTransformer extends Transformer
     {
         return [
             'id' => $order->id,
-            'date_order' => date('d-m-Y H:i:s', strtotime($order->created_at)),
+            'date_order' => strtotime($order->created_at),
             'total' => (float) $order->total,
             'status' => $order->status,
         ];
