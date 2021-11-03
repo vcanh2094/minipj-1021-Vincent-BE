@@ -28,6 +28,7 @@ class UpdateProductRequest extends FormRequest
             'price' => 'required|numeric|gt:0',
             'category_id' => 'required|numeric|min:1',
             'content' => 'string',
+            'description' => 'string',
             'feature' => 'in:0,1',
             'sale' => 'numeric|between:0,1',
         ];
