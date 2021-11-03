@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\API\AddressController;
+use App\Http\Controllers\API\Admin\AdminOrderController;
 use App\Http\Controllers\API\Admin\AdminProductController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\FavoriteController;
@@ -64,6 +65,7 @@ Route::group([
     Route::post('create-banner', [SlideController::class, 'store']);
     Route::get('product-list', [AdminProductController::class, 'index']);
     Route::apiResource('products', ProductController::class)->except(['create', 'edit']); //CRUD Products
+    Route::apiResource('orders', AdminOrderController::class)->only('index', 'update');
     Route::post('logout', [AdminController::class, 'logout']);
 });
 

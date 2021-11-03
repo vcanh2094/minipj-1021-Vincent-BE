@@ -16,6 +16,7 @@ class OrderTransformer extends Transformer
     protected $relations = [
         'order_details' => OrderDetailTransformer::class,
         'address' => AddressTransformer::class,
+        'user' => UserTransformer::class,
     ];
 
     /**
