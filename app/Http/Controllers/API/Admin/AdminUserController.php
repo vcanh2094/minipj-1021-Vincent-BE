@@ -22,7 +22,7 @@ class AdminUserController extends Controller
         User::query()->where('id', $user)->delete();
         Order::query()->where('user_id', $user)->delete();
         Favorite::query()->where('user_id', $user)->delete();
-        Address::query()->where('user_id', $user)->delete;
+        Address::query()->where('user_id', $user)->delete();
         return responder()->success()->respond();
     }
 }
