@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Address;
 use App\Models\Favorite;
 use App\Models\Order;
 use App\Models\User;
@@ -21,6 +22,7 @@ class AdminUserController extends Controller
         User::query()->where('id', $user)->delete();
         Order::query()->where('user_id', $user)->delete();
         Favorite::query()->where('user_id', $user)->delete();
+        Address::query()->where('user_id', $user)->delete;
         return responder()->success()->respond();
     }
 }
