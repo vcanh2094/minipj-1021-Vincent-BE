@@ -3,6 +3,7 @@
 use App\Http\Controllers\API\AddressController;
 use App\Http\Controllers\API\Admin\AdminOrderController;
 use App\Http\Controllers\API\Admin\AdminProductController;
+use App\Http\Controllers\API\Admin\AdminUserController;
 use App\Http\Controllers\API\AdminController;
 use App\Http\Controllers\API\FavoriteController;
 use App\Http\Controllers\API\OrderController;
@@ -67,6 +68,8 @@ Route::group([
     Route::apiResource('products', ProductController::class)->except(['create', 'edit']); //CRUD Products
     Route::apiResource('orders', AdminOrderController::class)->only('index', 'update');
     Route::post('logout', [AdminController::class, 'logout']);
+    Route::get('users', [AdminUserController::class, 'index']);
+    Route::delete('user/{user}', [AdminUserController::class, 'delete']);
 });
 
 
